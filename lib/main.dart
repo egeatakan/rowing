@@ -21,26 +21,49 @@ class KayikYarisi extends StatefulWidget {
 }
 
 class _KayikYarisiState extends State<KayikYarisi> {
-  double ileriGeri = 0;
+  double mesafe = 0;
+  double oncekiZ = 0;
+  bool ilkVeri = true;
 
   @override
   void initState() {
     super.initState();
+
     accelerometerEvents.listen((AccelerometerEvent event) {
-      setState(() {
-        ileriGeri = event.z; // z ekseni → ileri geri hareket
-      });
+      double z = event.z;
+
+      if (ilkVeri) {
+        oncekiZ = z;
+        ilkVeri = false;
+        return;
+      }
+
+      double fark = (z - oncekiZ).abs();
+      oncekiZ = z;
+
+      if (fark > 0.5) {
+        setState(() {
+          mesafe += fark * 0.08; // oranı küçük tuttuk
+        });
+      }
     });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.lightBlue.shade100,
+      backgroundColor: Colors.blue.shade100,
       body: Center(
-        child: Text(
-          "İleri-Geri: ${ileriGeri.toStringAsFixed(2)}",
-          style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              "Gidilen Mesafe: ${mesafe.toStringAsFixed(2)} m",
+              style: const TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 24),
+            const Text("Tableti ileri geri salla 🛶", style: TextStyle(fontSize: 18)),
+          ],
         ),
       ),
     );

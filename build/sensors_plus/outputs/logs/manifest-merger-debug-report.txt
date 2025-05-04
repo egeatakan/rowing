@@ -1,0 +1,15 @@
+-- Merging decision tree log ---
+manifest
+ADDED from C:\Users\egeat\AppData\Local\Pub\Cache\hosted\pub.dev\sensors_plus-3.1.0\android\src\main\AndroidManifest.xml:1:1-57
+INJECTED from C:\Users\egeat\AppData\Local\Pub\Cache\hosted\pub.dev\sensors_plus-3.1.0\android\src\main\AndroidManifest.xml:1:1-57
+	package
+		ADDED from C:\Users\egeat\AppData\Local\Pub\Cache\hosted\pub.dev\sensors_plus-3.1.0\android\src\main\AndroidManifest.xml:1:11-54
+		INJECTED from C:\Users\egeat\AppData\Local\Pub\Cache\hosted\pub.dev\sensors_plus-3.1.0\android\src\main\AndroidManifest.xml
+uses-sdk
+INJECTED from C:\Users\egeat\AppData\Local\Pub\Cache\hosted\pub.dev\sensors_plus-3.1.0\android\src\main\AndroidManifest.xml reason: use-sdk injection requested
+INJECTED from C:\Users\egeat\AppData\Local\Pub\Cache\hosted\pub.dev\sensors_plus-3.1.0\android\src\main\AndroidManifest.xml
+INJECTED from C:\Users\egeat\AppData\Local\Pub\Cache\hosted\pub.dev\sensors_plus-3.1.0\android\src\main\AndroidManifest.xml
+	android:targetSdkVersion
+		INJECTED from C:\Users\egeat\AppData\Local\Pub\Cache\hosted\pub.dev\sensors_plus-3.1.0\android\src\main\AndroidManifest.xml
+	android:minSdkVersion
+		INJECTED from C:\Users\egeat\AppData\Local\Pub\Cache\hosted\pub.dev\sensors_plus-3.1.0\android\src\main\AndroidManifest.xml
