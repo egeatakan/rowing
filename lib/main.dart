@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:sensors_plus/sensors_plus.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() => runApp(const MyApp());
 
@@ -8,9 +9,7 @@ class MyApp extends StatelessWidget {
   const MyApp({super.key});
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: RaceScreen(),
-    );
+    return const MaterialApp(home: RaceScreen());
   }
 }
 
@@ -37,10 +36,35 @@ class _RaceScreenState extends State<RaceScreen> {
 
   int wins = 0;
   int losses = 0;
-
   int totalRaces = 0;
   double totalTime = 0.0;
   double bestTime = double.infinity;
+
+  @override
+  void initState() {
+    super.initState();
+    loadStats();
+  }
+
+  Future<void> loadStats() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      wins = prefs.getInt('wins') ?? 0;
+      losses = prefs.getInt('losses') ?? 0;
+      totalRaces = prefs.getInt('totalRaces') ?? 0;
+      totalTime = prefs.getDouble('totalTime') ?? 0.0;
+      bestTime = prefs.getDouble('bestTime') ?? double.infinity;
+    });
+  }
+
+  Future<void> saveStats() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt('wins', wins);
+    await prefs.setInt('losses', losses);
+    await prefs.setInt('totalRaces', totalRaces);
+    await prefs.setDouble('totalTime', totalTime);
+    await prefs.setDouble('bestTime', bestTime);
+  }
 
   void startRace() {
     raceOver = false;
@@ -49,7 +73,7 @@ class _RaceScreenState extends State<RaceScreen> {
     firstRead = true;
     raceTime = 0.0;
 
-    raceTimer = Timer.periodic(const Duration(milliseconds: 10), (timer) {
+    raceTimer = Timer.periodic(const Duration(milliseconds: 10), (_) {
       setState(() {
         raceTime += 0.01;
       });
@@ -78,9 +102,8 @@ class _RaceScreenState extends State<RaceScreen> {
       }
     });
 
-    botTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+    botTimer = Timer.periodic(const Duration(seconds: 1), (_) {
       if (raceOver) return;
-
       setState(() {
         botDistance += botSpeed;
         if (botDistance >= 100 && !raceOver) {
@@ -90,7 +113,7 @@ class _RaceScreenState extends State<RaceScreen> {
     });
   }
 
-  void finishRace(String winner) {
+  void finishRace(String winner) async {
     raceOver = true;
     botTimer?.cancel();
     sensorSubscription?.cancel();
@@ -106,6 +129,8 @@ class _RaceScreenState extends State<RaceScreen> {
     } else {
       losses++;
     }
+
+    await saveStats();
 
     showDialog(
       context: context,
@@ -123,9 +148,7 @@ class _RaceScreenState extends State<RaceScreen> {
           TextButton(
             onPressed: () {
               Navigator.of(context).pop();
-              setState(() {
-                selectedDifficulty = null;
-              });
+              setState(() => selectedDifficulty = null);
             },
             child: const Text("Play Again"),
           )
