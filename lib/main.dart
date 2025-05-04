@@ -29,6 +29,8 @@ class _RaceScreenState extends State<RaceScreen> {
   bool firstRead = true;
   bool raceOver = false;
   Timer? botTimer;
+  Timer? raceTimer;
+  double raceTime = 0.0;
   StreamSubscription<AccelerometerEvent>? sensorSubscription;
   Difficulty? selectedDifficulty;
   double botSpeed = 0.5;
@@ -43,6 +45,14 @@ class _RaceScreenState extends State<RaceScreen> {
     botDistance = 0;
     playerDistance = 0;
     firstRead = true;
+    raceTime = 0.0;
+
+    // 0.01 saniyelik zamanlayıcı
+    raceTimer = Timer.periodic(const Duration(milliseconds: 10), (timer) {
+      setState(() {
+        raceTime += 0.01;
+      });
+    });
 
     // sensör
     sensorSubscription = accelerometerEvents.listen((event) {
@@ -85,11 +95,13 @@ class _RaceScreenState extends State<RaceScreen> {
     raceOver = true;
     botTimer?.cancel();
     sensorSubscription?.cancel();
+    raceTimer?.cancel();
 
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
         title: Text("$winner Wins!"),
+        content: Text("Time: ${raceTime.toStringAsFixed(2)} seconds"),
         actions: [
           TextButton(
             onPressed: () {
@@ -109,7 +121,7 @@ class _RaceScreenState extends State<RaceScreen> {
     setState(() {
       selectedDifficulty = difficulty;
       botSpeed = switch (difficulty) {
-        Difficulty.easy => 6.0,
+        Difficulty.easy => 6.3,
         Difficulty.medium => 6.5,
         Difficulty.hard => 6.8,
       };
@@ -120,6 +132,7 @@ class _RaceScreenState extends State<RaceScreen> {
   @override
   void dispose() {
     botTimer?.cancel();
+    raceTimer?.cancel();
     sensorSubscription?.cancel();
     super.dispose();
   }
@@ -151,6 +164,8 @@ class _RaceScreenState extends State<RaceScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text("Difficulty: ${selectedDifficulty!.name.toUpperCase()}", style: const TextStyle(fontSize: 18)),
+            const SizedBox(height: 10),
+            Text("Time: ${raceTime.toStringAsFixed(2)} s", style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w500)),
             const SizedBox(height: 20),
             const Text("🚣 You vs 🤖 Bot", style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
             const SizedBox(height: 30),
