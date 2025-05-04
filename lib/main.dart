@@ -38,6 +38,10 @@ class _RaceScreenState extends State<RaceScreen> {
   int wins = 0;
   int losses = 0;
 
+  int totalRaces = 0;
+  double totalTime = 0.0;
+  double bestTime = double.infinity;
+
   void startRace() {
     raceOver = false;
     botDistance = 0;
@@ -92,8 +96,13 @@ class _RaceScreenState extends State<RaceScreen> {
     sensorSubscription?.cancel();
     raceTimer?.cancel();
 
+    totalRaces++;
+    totalTime += raceTime;
     if (winner == "You") {
       wins++;
+      if (raceTime < bestTime) {
+        bestTime = raceTime;
+      }
     } else {
       losses++;
     }
@@ -102,7 +111,14 @@ class _RaceScreenState extends State<RaceScreen> {
       context: context,
       builder: (_) => AlertDialog(
         title: Text("$winner Wins!"),
-        content: Text("Time: ${raceTime.toStringAsFixed(2)} seconds"),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text("Time: ${raceTime.toStringAsFixed(2)} seconds"),
+            if (winner == "You" && raceTime == bestTime)
+              const Text("🎉 New Record!", style: TextStyle(color: Colors.green)),
+          ],
+        ),
         actions: [
           TextButton(
             onPressed: () {
@@ -140,21 +156,30 @@ class _RaceScreenState extends State<RaceScreen> {
 
   @override
   Widget build(BuildContext context) {
+    double avgTime = totalRaces > 0 ? totalTime / totalRaces : 0.0;
+
     if (selectedDifficulty == null) {
       return Scaffold(
         backgroundColor: Colors.teal.shade50,
         body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Text("Select Difficulty", style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-              const SizedBox(height: 20),
-              Text("🏆 Wins: $wins    ❌ Losses: $losses", style: const TextStyle(fontSize: 18)),
-              const SizedBox(height: 30),
-              ElevatedButton(onPressed: () => selectDifficulty(Difficulty.easy), child: const Text("Easy")),
-              ElevatedButton(onPressed: () => selectDifficulty(Difficulty.medium), child: const Text("Medium")),
-              ElevatedButton(onPressed: () => selectDifficulty(Difficulty.hard), child: const Text("Hard")),
-            ],
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Text("Select Difficulty", style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+                const SizedBox(height: 20),
+                Text("🏆 Wins: $wins    ❌ Losses: $losses", style: const TextStyle(fontSize: 18)),
+                const SizedBox(height: 10),
+                Text("📊 Total Races: $totalRaces", style: const TextStyle(fontSize: 16)),
+                Text("⏱ Avg. Time: ${avgTime.toStringAsFixed(2)} s", style: const TextStyle(fontSize: 16)),
+                Text("🥇 Best Time: ${bestTime == double.infinity ? "N/A" : bestTime.toStringAsFixed(2) + " s"}",
+                    style: const TextStyle(fontSize: 16)),
+                const SizedBox(height: 30),
+                ElevatedButton(onPressed: () => selectDifficulty(Difficulty.easy), child: const Text("Easy")),
+                ElevatedButton(onPressed: () => selectDifficulty(Difficulty.medium), child: const Text("Medium")),
+                ElevatedButton(onPressed: () => selectDifficulty(Difficulty.hard), child: const Text("Hard")),
+              ],
+            ),
           ),
         ),
       );
