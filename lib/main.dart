@@ -35,10 +35,8 @@ class _RaceScreenState extends State<RaceScreen> {
   Difficulty? selectedDifficulty;
   double botSpeed = 0.5;
 
-  @override
-  void initState() {
-    super.initState();
-  }
+  int wins = 0;
+  int losses = 0;
 
   void startRace() {
     raceOver = false;
@@ -47,14 +45,12 @@ class _RaceScreenState extends State<RaceScreen> {
     firstRead = true;
     raceTime = 0.0;
 
-    // 0.01 saniyelik zamanlayıcı
     raceTimer = Timer.periodic(const Duration(milliseconds: 10), (timer) {
       setState(() {
         raceTime += 0.01;
       });
     });
 
-    // sensör
     sensorSubscription = accelerometerEvents.listen((event) {
       if (raceOver) return;
 
@@ -78,7 +74,6 @@ class _RaceScreenState extends State<RaceScreen> {
       }
     });
 
-    // bot
     botTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (raceOver) return;
 
@@ -96,6 +91,12 @@ class _RaceScreenState extends State<RaceScreen> {
     botTimer?.cancel();
     sensorSubscription?.cancel();
     raceTimer?.cancel();
+
+    if (winner == "You") {
+      wins++;
+    } else {
+      losses++;
+    }
 
     showDialog(
       context: context,
@@ -121,9 +122,9 @@ class _RaceScreenState extends State<RaceScreen> {
     setState(() {
       selectedDifficulty = difficulty;
       botSpeed = switch (difficulty) {
-        Difficulty.easy => 6.3,
-        Difficulty.medium => 6.5,
-        Difficulty.hard => 6.8,
+        Difficulty.easy => 0.3,
+        Difficulty.medium => 0.5,
+        Difficulty.hard => 0.8,
       };
       startRace();
     });
@@ -148,6 +149,8 @@ class _RaceScreenState extends State<RaceScreen> {
             children: [
               const Text("Select Difficulty", style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
               const SizedBox(height: 20),
+              Text("🏆 Wins: $wins    ❌ Losses: $losses", style: const TextStyle(fontSize: 18)),
+              const SizedBox(height: 30),
               ElevatedButton(onPressed: () => selectDifficulty(Difficulty.easy), child: const Text("Easy")),
               ElevatedButton(onPressed: () => selectDifficulty(Difficulty.medium), child: const Text("Medium")),
               ElevatedButton(onPressed: () => selectDifficulty(Difficulty.hard), child: const Text("Hard")),
