@@ -32,12 +32,14 @@ dependencies:
     sdk: flutter
   sensors_plus: ^3.0.0
   shared_preferences: ^2.2.2
-
+  firebase_core: ^2.31.0
+  firebase_auth: ^4.19.0
 
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
+  clerk_flutter: ^0.0.9-beta
 
 dev_dependencies:
   flutter_test:

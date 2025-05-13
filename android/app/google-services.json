@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "921418314712",
+    "project_id": "rowing-game-ff01c",
+    "storage_bucket": "rowing-game-ff01c.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:921418314712:android:722b06552c1c66b0fd38ad",
+        "android_client_info": {
+          "package_name": "com.example.kurek_yarisi"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "921418314712-nfoe6egtsf9ltukgn5qmuue885p839qo.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCbN2g1TCowfghqgotxqd_4EL0jaMbCwWc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "921418314712-nfoe6egtsf9ltukgn5qmuue885p839qo.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "921418314712-mi5796a2gi0t1557ffutj79q68q6o590.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.kurekYarisi"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,5 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="default_web_client_id" translatable="false">921418314712-nfoe6egtsf9ltukgn5qmuue885p839qo.apps.googleusercontent.com</string>
+    <string name="gcm_defaultSenderId" translatable="false">921418314712</string>
+    <string name="google_api_key" translatable="false">AIzaSyCbN2g1TCowfghqgotxqd_4EL0jaMbCwWc</string>
+    <string name="google_app_id" translatable="false">1:921418314712:android:722b06552c1c66b0fd38ad</string>
+    <string name="google_crash_reporting_api_key" translatable="false">AIzaSyCbN2g1TCowfghqgotxqd_4EL0jaMbCwWc</string>
+    <string name="google_storage_bucket" translatable="false">rowing-game-ff01c.firebasestorage.app</string>
+    <string name="project_id" translatable="false">rowing-game-ff01c</string>
     <style name="LaunchTheme" parent="@android:style/Theme.Light.NoTitleBar">
         
         <item name="android:windowBackground">@drawable/launch_background</item>
