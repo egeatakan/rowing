@@ -1,10 +1,13 @@
 // lib/difficulty_selection_screen.dart
 import 'package:flutter/material.dart';
 // Aşağıdaki importlar KESİNLİKLE GEREKLİDİR ve dosyaların lib klasöründe olduğunu varsayar:
+// Eğer difficulty_selector.dart ve race_screen.dart dosyalarınız farklı bir klasördeyse
+// (örn: lib/widgets/ veya lib/screens/), bu yolları ona göre güncelleyin.
 import 'difficulty_selector.dart'; // DifficultyLevel enum'ı ve DifficultySelector widget'ı için
 import 'race_screen.dart';       // RaceScreen widget'ı için
 import 'package:firebase_auth/firebase_auth.dart'; // Firebase Auth işlemleri için (çıkış butonu)
 
+// BU SINIFIN ADININ TAM OLARAK "DifficultySelectionScreen" OLDUĞUNDAN EMİN OLUN
 class DifficultySelectionScreen extends StatelessWidget {
   const DifficultySelectionScreen({super.key});
 

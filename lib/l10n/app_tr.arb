@@ -1,0 +1,20 @@
+{
+  "@@locale": "tr",
+  "appTitle": "Rowing Pro",
+  "mainMenu": "Ana Menü",
+  "play": "OYNA",
+  "statistics": "İSTATİSTİKLER",
+  "settings": "AYARLAR",
+  "exit": "ÇIKIŞ",
+  "profile": "PROFİLİM",
+  "welcomeMessage": "Hoş geldin, {userName}",
+  "settingsTitle": "Ayarlar",
+  "statisticsTitle": "İstatistiklerim",
+  "language": "Dil",
+  "selectLanguage": "Dil Seçin",
+  "profileTitle": "Kullanıcı Profili",
+  "save": "Kaydet",
+  "personalInformation": "Kişisel Bilgiler",
+  "name": "Adınız",
+  "featureComingSoon": "Bu özellik yakında eklenecektir."
+}

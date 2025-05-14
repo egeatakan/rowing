@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import 'firebase_options.dart';
-// RaceScreen'i doğrudan burada import etmiyoruz, DifficultySelectionScreen üzerinden geçilecek.
-import 'difficulty_selection_screen.dart'; // YENİ EKLENEN EKRAN
-
-// SignInScreen'i ayrı bir dosyaya taşıdıysanız (kesinlikle önerilir),
-// o dosyadan import edin. Örneğin:
-// import 'screens/sign_in_screen.dart'; // Eğer lib/screens/sign_in_screen.dart ise
+// main_menu_screen.dart dosyanızın doğru yolda olduğundan emin olun
+// Örneğin, lib/screens/main_menu_screen.dart ise:
+import 'screens/main_menu_screen.dart';
+// SignInScreen dosyanızın doğru yolda olduğundan emin olun
+// Örneğin, lib/screens/sign_in_screen.dart ise:
+// import 'screens/sign_in_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -18,60 +21,135 @@ void main() async {
   runApp(const MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
+
+  static void setLocale(BuildContext context, Locale newLocale) {
+    _MyAppState? state = context.findAncestorStateOfType<_MyAppState>();
+    state?.setLocale(newLocale);
+  }
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  Locale? _locale;
+  // SharedPreferences anahtarını değiştirmek, eski kaydedilmiş değeri geçersiz kılar.
+  // Testler için V2, V3 gibi artırabilirsiniz.
+  static const String _selectedLanguageCodeKey = 'selectedLanguageCodeV2';
+
+  @override
+  void initState() {
+    super.initState();
+    _loadLocale();
+  }
+
+  Future<void> _loadLocale() async {
+    final prefs = await SharedPreferences.getInstance();
+    String? languageCode = prefs.getString(_selectedLanguageCodeKey);
+    Locale initialLocale;
+
+    if (languageCode != null && languageCode.isNotEmpty) {
+      initialLocale = Locale(languageCode);
+    } else {
+      initialLocale = const Locale('en'); // Varsayılan dil İngilizce
+      // Eğer ilk defa varsayılan dil atanıyorsa ve bunu kaydetmek isterseniz:
+      // await _saveLocale(initialLocale);
+    }
+
+    if (mounted) {
+      setState(() {
+        _locale = initialLocale;
+      });
+    }
+  }
+
+  Future<void> _saveLocale(Locale locale) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_selectedLanguageCodeKey, locale.languageCode);
+  }
+
+  void setLocale(Locale locale) {
+    if (mounted) {
+      setState(() {
+        _locale = locale;
+      });
+    }
+    _saveLocale(locale);
+  }
 
   @override
   Widget build(BuildContext context) {
+    if (_locale == null) {
+      // _loadLocale tamamlanana kadar kısa bir yükleme ekranı
+      return const MaterialApp(
+        home: Scaffold(body: Center(child: CircularProgressIndicator())),
+        debugShowCheckedModeBanner: false,
+      );
+    }
+
     return MaterialApp(
-      title: 'Rowing Race',
+      // key: ValueKey(_locale), // <-- BU SATIR KALDIRILDI veya YORUM SATIRI YAPILDI
+                               // Navigasyon yığınının sıfırlanmasını önlemek için.
+      title: 'Rowing Pro',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         primarySwatch: Colors.blue,
         visualDensity: VisualDensity.adaptivePlatformDensity,
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blueAccent), // Daha modern bir renk şeması
-        useMaterial3: true, // Material 3 tasarımını etkinleştir
-        elevatedButtonTheme: ElevatedButtonThemeData( // Genel buton stili
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: Colors.lightBlueAccent,
+          brightness: Brightness.light,
+        ),
+        useMaterial3: true,
+        elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.blueAccent,
-            foregroundColor: Colors.white,
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
             textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(10),
             ),
           ),
         ),
-        textButtonTheme: TextButtonThemeData( // Genel text buton stili
+        textButtonTheme: TextButtonThemeData(
            style: TextButton.styleFrom(
-            foregroundColor: Colors.blueAccent,
             textStyle: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
           )
         ),
-        inputDecorationTheme: InputDecorationTheme( // Genel TextField stili
+        inputDecorationTheme: InputDecorationTheme(
           border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(10),
           ),
           focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(8),
-            borderSide: const BorderSide(color: Colors.blueAccent, width: 2),
+            borderRadius: BorderRadius.circular(10),
+            borderSide: BorderSide(color: Colors.lightBlueAccent.shade700, width: 2),
           ),
-          labelStyle: const TextStyle(color: Colors.blueAccent),
+        ),
+        appBarTheme: AppBarTheme(
+          backgroundColor: Colors.lightBlueAccent.shade100,
+          elevation: 2,
+          titleTextStyle: TextStyle(
+            color: Colors.black87,
+            fontSize: 20,
+            fontWeight: FontWeight.w500,
+          ),
+          iconTheme: const IconThemeData(color: Colors.black87),
         ),
       ),
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
+      locale: _locale, // Bu satır, MaterialApp'e hangi dilin kullanılacağını söyler.
+
       home: StreamBuilder<User?>(
         stream: FirebaseAuth.instance.authStateChanges(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Scaffold(body: Center(child: CircularProgressIndicator()));
           }
-
           if (snapshot.hasData && snapshot.data != null) {
-            // Kullanıcı giriş yapmışsa YENİ Zorluk Seçim Ekranını göster
-            return const DifficultySelectionScreen();
+            return const MainMenuScreen();
           }
-
-          // Kullanıcı giriş yapmamışsa SignInScreen'i göster.
+          // SignInScreen'in doğru import edildiğinden/tanımlandığından emin olun
           return const SignInScreen();
         },
       ),
@@ -80,10 +158,9 @@ class MyApp extends StatelessWidget {
 }
 
 //===================================================================
-// ÖRNEK: GİRİŞ / KAYIT EKRANI (SignInScreen)
+// GİRİŞ / KAYIT EKRANI (SignInScreen)
 //===================================================================
-// BU WIDGET'I TEMİZ KOD İÇİN AYRI BİR DOSYAYA TAŞIMANIZ ÖNERİLİR.
-//===================================================================
+// Bu widget'ı lib/screens/sign_in_screen.dart gibi ayrı bir dosyaya taşımanız önerilir.
 class SignInScreen extends StatefulWidget {
   const SignInScreen({Key? key}) : super(key: key);
 
@@ -95,7 +172,7 @@ class _SignInScreenState extends State<SignInScreen> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   bool _loading = false;
-  final _formKey = GlobalKey<FormState>(); // Form validasyonu için
+  final _formKey = GlobalKey<FormState>();
 
   @override
   void dispose() {
@@ -104,22 +181,12 @@ class _SignInScreenState extends State<SignInScreen> {
     super.dispose();
   }
 
-  // String_view errorMessagePrefix DÜZELTİLDİ -> String errorMessagePrefix
-  Future<void> _handleAuthOperation(Future<UserCredential> Function() authOperation, String successMessage, String errorMessagePrefix) async {
+  Future<void> _handleAuthOperation(Future<UserCredential> Function() authOperation, String errorMessagePrefix) async {
     if (!_formKey.currentState!.validate()) return;
-
     if (!mounted) return;
     setState(() { _loading = true; });
-
     try {
       await authOperation();
-      // Başarılı işlem sonrası StreamBuilder yönlendirmeyi yapacağı için
-      // burada ek bir SnackBar göstermeye genellikle gerek yoktur.
-      // if (mounted) {
-      //    ScaffoldMessenger.of(context).showSnackBar(
-      //      SnackBar(content: Text(successMessage), backgroundColor: Colors.green),
-      //    );
-      // }
     } on FirebaseAuthException catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -139,7 +206,6 @@ class _SignInScreenState extends State<SignInScreen> {
         );
       }
     }
-
     if (!mounted) return;
     setState(() { _loading = false; });
   }
@@ -150,7 +216,6 @@ class _SignInScreenState extends State<SignInScreen> {
         email: _emailController.text.trim(),
         password: _passwordController.text.trim(),
       ),
-      'Giriş başarılı!', // Bu mesaj artık gösterilmiyor, StreamBuilder yönlendiriyor.
       'Giriş hatası'
     );
   }
@@ -161,13 +226,13 @@ class _SignInScreenState extends State<SignInScreen> {
         email: _emailController.text.trim(),
         password: _passwordController.text.trim(),
       ),
-      'Kayıt başarılı!', // Bu mesaj artık gösterilmiyor, StreamBuilder yönlendiriyor.
       'Kayıt hatası'
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
       body: SafeArea(
         child: Center(
@@ -179,21 +244,21 @@ class _SignInScreenState extends State<SignInScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Icon(Icons.rowing, size: 80, color: Theme.of(context).colorScheme.primary),
+                  Icon(Icons.rowing, size: 80, color: theme.colorScheme.primary),
                   const SizedBox(height: 20),
                   Text(
                     "Rowing Pro",
                     textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.headlineLarge?.copyWith(
+                    style: theme.textTheme.displaySmall?.copyWith(
                           fontWeight: FontWeight.bold,
-                          color: Theme.of(context).colorScheme.primary,
+                          color: theme.colorScheme.primary,
                         ),
                   ),
                   const SizedBox(height: 8),
                   Text(
                     "Hesabınıza giriş yapın veya yeni hesap oluşturun",
                     textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(color: Colors.grey[700]),
+                    style: theme.textTheme.titleMedium?.copyWith(color: Colors.grey[700]),
                   ),
                   const SizedBox(height: 40),
                   TextFormField(

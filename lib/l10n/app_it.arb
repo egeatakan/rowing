@@ -1,0 +1,20 @@
+{
+  "@@locale": "it",
+  "appTitle": "Rowing Pro",
+  "mainMenu": "Menu Principale",
+  "play": "GIOCA",
+  "statistics": "STATISTICHE",
+  "settings": "IMPOSTAZIONI",
+  "exit": "ESCI",
+  "profile": "IL MIO PROFILO",
+  "welcomeMessage": "Benvenuto, {userName}",
+  "settingsTitle": "Impostazioni",
+  "statisticsTitle": "Le Mie Statistiche",
+  "language": "Lingua",
+  "selectLanguage": "Seleziona Lingua",
+  "profileTitle": "Profilo Utente",
+  "save": "Salva",
+  "personalInformation": "Informazioni Personali",
+  "name": "Il Tuo Nome",
+  "featureComingSoon": "Questa funzione verrà aggiunta presto."
+}

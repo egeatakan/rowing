@@ -1,0 +1,29 @@
+{
+  "@@locale": "en",
+  "appTitle": "Rowing Pro",
+  "mainMenu": "Main Menu",
+  "play": "PLAY",
+  "statistics": "STATISTICS",
+  "settings": "SETTINGS",
+  "exit": "EXIT",
+  "profile": "MY PROFILE",
+  "welcomeMessage": "Welcome, {userName}",
+  "@welcomeMessage": {
+    "description": "Welcome message for the user",
+    "placeholders": {
+      "userName": {
+        "type": "String", 
+        "example": "John Doe"
+      }
+    }
+  },
+  "settingsTitle": "Settings",
+  "statisticsTitle": "My Statistics",
+  "language": "Language",
+  "selectLanguage": "Select Language",
+  "profileTitle": "User Profile",
+  "save": "Save",
+  "personalInformation": "Personal Information",
+  "name": "Your Name",
+  "featureComingSoon": "This feature will be added soon."
+}

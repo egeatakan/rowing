@@ -1,8 +1,9 @@
-#Wed May 14 16:43:42 CEST 2025
+#Wed May 14 19:31:27 CEST 2025
 path.4=2/classes.dex
 path.3=1/classes.dex
 path.2=0/classes.dex
 path.1=0/classes.dex
+path.6=classes3.dex
 path.5=classes2.dex
 path.0=classes.dex
 base.4=C\:\\Users\\egeat\\Desktop\\VSC\\kurek_yarisi\\build\\app\\intermediates\\dex\\debug\\mergeProjectDexDebug\\2\\classes.dex
@@ -14,6 +15,8 @@ renamed.3=classes4.dex
 renamed.2=classes3.dex
 renamed.1=classes2.dex
 renamed.0=classes.dex
+renamed.6=classes7.dex
 renamed.5=classes6.dex
+base.6=C\:\\Users\\egeat\\Desktop\\VSC\\kurek_yarisi\\build\\app\\intermediates\\dex\\debug\\mergeExtDexDebug\\classes3.dex
 renamed.4=classes5.dex
 base.5=C\:\\Users\\egeat\\Desktop\\VSC\\kurek_yarisi\\build\\app\\intermediates\\dex\\debug\\mergeExtDexDebug\\classes2.dex
