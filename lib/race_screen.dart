@@ -2,20 +2,35 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:sensors_plus/sensors_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:firebase_auth/firebase_auth.dart'; // <-- Firebase Auth EKLENDİ
-import 'stats_panel.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'difficulty_selection_screen.dart';
+// BU IMPORT SATIRI ÇOK ÖNEMLİ!
+// DifficultyLevel enum'ını ve dolayısıyla newSelectedDifficulty parametresinin tipini buradan alır.
+// lib/difficulty_selector.dart dosyanızın var olduğundan ve DifficultyLevel enum'ını içerdiğinden emin olun.
+import 'difficulty_selector.dart';
 
-enum Difficulty { easy, medium, hard }
+// StatsPanel bu ekranda doğrudan kullanılmıyor, ancak istatistikler için
+// ayrı bir ekranınız varsa veya farklı bir mantıkla kullanıyorsanız bu import kalabilir.
+// import 'stats_panel.dart';
 
 class RaceScreen extends StatefulWidget {
-  const RaceScreen({super.key});
+  // DifficultySelectionScreen'den gelen parametreler:
+  // BU CONSTRUCTOR'IN DOĞRU OLDUĞUNDAN EMİN OLUN:
+  final DifficultyLevel newSelectedDifficulty; // Tipi DifficultyLevel olmalı
+  final int? dynamicMatchCount;
+
+  const RaceScreen({
+    super.key,
+    required this.newSelectedDifficulty, // Bu parametre zorunlu
+    this.dynamicMatchCount, // Bu parametre opsiyonel (null olabilir)
+  });
 
   @override
   State<RaceScreen> createState() => _RaceScreenState();
 }
 
 class _RaceScreenState extends State<RaceScreen> {
-  // --- Mevcut State Değişkenleriniz ---
+  // --- State Değişkenleri ---
   double playerDistance = 0;
   double botDistance = 0;
   double previousZ = 0;
@@ -25,28 +40,77 @@ class _RaceScreenState extends State<RaceScreen> {
   Timer? raceTimer;
   double raceTime = 0.0;
   StreamSubscription<AccelerometerEvent>? sensorSubscription;
-  Difficulty? selectedDifficulty;
-  double botSpeed = 0.5;
+  double botSpeed = 5.0; // Varsayılan bot hızı, initState'te güncellenecek
 
   int wins = 0;
   int losses = 0;
   int totalRaces = 0;
   double totalTime = 0.0;
   double bestTime = double.infinity;
-  // --- Mevcut State Değişkenleriniz Bitiş ---
-
+  String _currentRaceStatusMessage = "Yarış bilgileri yükleniyor...";
 
   @override
   void initState() {
     super.initState();
-    loadStats();
+    _initializeRaceParameters(); // Yarış parametrelerini widget'tan gelen değere göre ayarla
+    loadStats(); // Kayıtlı istatistikleri yükle
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted && !raceOver) {
+        startRace();
+      }
+    });
   }
 
-  // --- Mevcut Metotlarınız ---
+  void _initializeRaceParameters() {
+    // Gelen zorluk seviyesine göre bot hızını ve diğer parametreleri ayarla
+    // widget.newSelectedDifficulty burada kullanılır.
+    switch (widget.newSelectedDifficulty) {
+      case DifficultyLevel.kolay:
+        botSpeed = 3.3;
+        _currentRaceStatusMessage = "Kolay Seviyede Yarış Başlıyor!";
+        break;
+      case DifficultyLevel.orta:
+        botSpeed = 5.5;
+        _currentRaceStatusMessage = "Orta Seviyede Yarış Başlıyor!";
+        break;
+      case DifficultyLevel.zor:
+        botSpeed = 6.8;
+        _currentRaceStatusMessage = "Zor Seviyede Yarış Başlıyor!";
+        break;
+      case DifficultyLevel.dinamik:
+        _currentRaceStatusMessage = "Dinamik Zorluk Hesaplanıyor...";
+        print('Dinamik zorluk seçildi. Maç sayısı: ${widget.dynamicMatchCount}');
+        if (widget.dynamicMatchCount != null && widget.dynamicMatchCount! > 0) {
+          // TODO: Firebase Firestore'dan son 'widget.dynamicMatchCount' maçın
+          // hız/süre verilerini çek. Bu işlem asenkron olmalı.
+          // Çekilen verilerden ortalama bir hız hesapla.
+          // botSpeed = hesaplananOrtalamaHiz;
+          botSpeed = 4.5; // Placeholder
+          _currentRaceStatusMessage = "Dinamik Zorluk (Son ${widget.dynamicMatchCount} Maç Ort.) ile Yarış Başlıyor!";
+          print('TODO: Firebase\'den son ${widget.dynamicMatchCount} maçın ortalama hızını çek ve botSpeed\'e ata.');
+        } else {
+          botSpeed = 5.5; // Varsayılan orta
+          _currentRaceStatusMessage = "Dinamik zorluk için yetersiz veri, Orta seviyede yarış başlıyor!";
+          print('Dinamik zorluk için geçerli maç sayısı yok, varsayılan hız (5.5) ayarlandı.');
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if(mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Dinamik zorluk için yeterli maç geçmişi bulunamadı. Orta seviyede başlatılıyor.')),
+              );
+            }
+          });
+        }
+        break;
+    }
+    if (mounted) {
+        setState(() {}); // _currentRaceStatusMessage ve botSpeed güncellendiği için UI'ı yenile
+    }
+  }
+
   Future<void> loadStats() async {
     final prefs = await SharedPreferences.getInstance();
-    // SharedPreferences kullanımında setState içinde çağırmak UI güncellemeleri için önemlidir.
-    if (mounted) { // Asenkron işlem sonrası widget hala ağaçta mı kontrolü
+    if (mounted) {
       setState(() {
         wins = prefs.getInt('wins') ?? 0;
         losses = prefs.getInt('losses') ?? 0;
@@ -63,14 +127,14 @@ class _RaceScreenState extends State<RaceScreen> {
     await prefs.setInt('losses', losses);
     await prefs.setInt('totalRaces', totalRaces);
     await prefs.setDouble('totalTime', totalTime);
-    // bestTime sonsuz değilse kaydet
     if (bestTime != double.infinity) {
-        await prefs.setDouble('bestTime', bestTime);
+      await prefs.setDouble('bestTime', bestTime);
     }
+    // TODO: Firebase'e maç sonucunu kaydetme mantığı eklenecek.
   }
 
   void startRace() {
-    // Yarış başlamadan önce setState ile UI güncellemelerini yap
+    if (!mounted) return;
     setState(() {
       raceOver = false;
       botDistance = 0;
@@ -79,19 +143,25 @@ class _RaceScreenState extends State<RaceScreen> {
       raceTime = 0.0;
     });
 
-    raceTimer?.cancel(); // Önceki timerları iptal et (varsa)
+    raceTimer?.cancel();
     sensorSubscription?.cancel();
     botTimer?.cancel();
 
     raceTimer = Timer.periodic(const Duration(milliseconds: 10), (_) {
-      if (!mounted) return; // Widget dispose edildiyse timer devam etmesin
+      if (!mounted || raceOver) {
+        raceTimer?.cancel();
+        return;
+      }
       setState(() {
         raceTime += 0.01;
       });
     });
 
     sensorSubscription = accelerometerEvents.listen((event) {
-      if (raceOver || !mounted) return;
+      if (raceOver || !mounted) {
+        sensorSubscription?.cancel();
+        return;
+      }
       double currentZ = event.z;
       if (firstRead) {
         previousZ = currentZ;
@@ -112,7 +182,10 @@ class _RaceScreenState extends State<RaceScreen> {
     });
 
     botTimer = Timer.periodic(const Duration(seconds: 1), (_) {
-      if (raceOver || !mounted) return;
+      if (raceOver || !mounted) {
+        botTimer?.cancel();
+        return;
+      }
       setState(() {
         botDistance += botSpeed;
         if (botDistance >= 100 && !raceOver) {
@@ -123,48 +196,52 @@ class _RaceScreenState extends State<RaceScreen> {
   }
 
   void finishRace(String winner) async {
-     if (raceOver) return; // Yarış zaten bittiyse tekrar bitirme
+    if (raceOver) return;
 
-     setState(() { // raceOver durumunu UI'a yansıtmak için setState içinde
-       raceOver = true;
-     });
-
-     botTimer?.cancel();
-     sensorSubscription?.cancel();
-     raceTimer?.cancel();
-
-
-    // State güncellemelerini setState içine alabiliriz
     if (mounted) {
-       setState(() {
-         totalRaces++;
-         totalTime += raceTime;
-         if (winner == "You") {
-           wins++;
-           if (raceTime < bestTime) bestTime = raceTime;
-         } else {
-           losses++;
-         }
-       });
+      setState(() {
+        raceOver = true;
+        _currentRaceStatusMessage = "$winner Kazandı!";
+      });
     }
-     await saveStats(); // İstatistikleri kaydet
 
+    botTimer?.cancel();
+    sensorSubscription?.cancel();
+    raceTimer?.cancel();
 
-    // Dialog göstermeden önce widget'ın hala mount edilip edilmediğini kontrol et
     if (mounted) {
-       showDialog(
+      setState(() {
+        totalRaces++;
+        totalTime += raceTime;
+        if (winner == "You") {
+          wins++;
+          if (raceTime < bestTime) bestTime = raceTime;
+        } else {
+          losses++;
+        }
+      });
+    }
+    await saveStats();
+
+    if (mounted) {
+      showDialog(
         context: context,
-        barrierDismissible: false, // Dışarı tıklayarak kapatmayı engelle
+        barrierDismissible: false,
         builder: (_) => AlertDialog(
-          title: Text("$winner Wins!"),
-          content: Text("Time: ${raceTime.toStringAsFixed(2)} seconds"),
+          title: Text("$winner Kazandı!"),
+          content: Text("Süre: ${raceTime.toStringAsFixed(2)} saniye"),
           actions: [
             TextButton(
               onPressed: () {
-                 Navigator.of(context).pop(); // Dialog'u kapat
-                 if (mounted) {
-                     setState(() => selectedDifficulty = null); // Zorluk seçim ekranına dön
-                 }
+                Navigator.of(context).pop();
+                if (mounted) {
+                  // DifficultySelectionScreen'e geri dönmek için import etmeniz gerekebilir.
+                  // Eğer DifficultySelectionScreen'i import etmediyseniz, bu satır hata verecektir.
+                  // import 'difficulty_selection_screen.dart'; // Gerekirse ekleyin
+                  Navigator.of(context).pushReplacement(
+                    MaterialPageRoute(builder: (context) => const DifficultySelectionScreen()),
+                  );
+                }
               },
               child: const Text("Tekrar Oyna"),
             ),
@@ -174,74 +251,68 @@ class _RaceScreenState extends State<RaceScreen> {
     }
   }
 
-  void selectDifficulty(Difficulty difficulty) {
-    setState(() {
-      selectedDifficulty = difficulty;
-      botSpeed = switch (difficulty) {
-        Difficulty.easy => 3.3,
-        Difficulty.medium => 5.5,
-        Difficulty.hard => 6.8,
-      };
-      startRace(); // startRace zaten setState içeriyor, tekrar sarmaya gerek yok
-    });
-  }
-
   @override
   void dispose() {
-    // Widget ağaçtan kaldırılırken tüm timer'ları ve stream aboneliklerini iptal et
     botTimer?.cancel();
     raceTimer?.cancel();
     sensorSubscription?.cancel();
     super.dispose();
   }
-  // --- Mevcut Metotlarınız Bitiş ---
 
-  // --- build Metodu GÜNCELLENDİ ---
   @override
   Widget build(BuildContext context) {
-    double avgTime = totalRaces > 0 ? totalTime / totalRaces : 0.0;
-    final user = FirebaseAuth.instance.currentUser; // Giriş yapmış kullanıcıyı al
+    final user = FirebaseAuth.instance.currentUser;
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
+    final TextTheme textTheme = Theme.of(context).textTheme;
 
-    // Her durumda bir Scaffold döndürerek AppBar'ı her zaman gösterelim
     return Scaffold(
       appBar: AppBar(
-        // Başlığı dinamik olarak ayarla
-        title: Text(selectedDifficulty == null ? 'İstatistik & Zorluk Seç' : 'Yarış Devam Ediyor!'),
-        // AppBar'ın sağına buton(lar) eklemek için 'actions' listesi
+        // widget.newSelectedDifficulty burada kullanılır
+        title: Text('${widget.newSelectedDifficulty.name.toUpperCase()} Seviye Yarış'),
+        backgroundColor: colorScheme.primaryContainer,
         actions: [
           IconButton(
-            icon: const Icon(Icons.logout), // Çıkış ikonu
-            tooltip: 'Çıkış Yap', // Üzerine gelince çıkan yazı
-            onPressed: () async { // Butona basılınca çalışacak async fonksiyon
-              // Hata yakalama bloğu
+            icon: const Icon(Icons.bar_chart),
+            tooltip: 'İstatistiklerim',
+            onPressed: () {
+              if (mounted) {
+                 showDialog(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                          title: const Text('İstatistiklerim'),
+                          content: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text('Kullanıcı: ${user?.email ?? 'Bilinmiyor'}', style: textTheme.bodyMedium),
+                              const SizedBox(height: 8),
+                              Text('Toplam Yarış: $totalRaces', style: textTheme.bodyMedium),
+                              Text('Kazandıkların: $wins', style: textTheme.bodyMedium),
+                              Text('Kaybettiklerin: $losses', style: textTheme.bodyMedium),
+                              Text('En İyi Süre: ${bestTime == double.infinity ? "N/A" : bestTime.toStringAsFixed(2) + " s"}', style: textTheme.bodyMedium),
+                              Text('Ortalama Süre: ${(totalRaces > 0 ? totalTime / totalRaces : 0.0).toStringAsFixed(2)} s', style: textTheme.bodyMedium),
+                            ],
+                          ),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.of(context).pop(),
+                              child: const Text('Kapat'),
+                            )
+                          ],
+                        ));
+              }
+            },
+          ),
+          IconButton(
+            icon: const Icon(Icons.logout),
+            tooltip: 'Çıkış Yap',
+            onPressed: () async {
               try {
-                print('Çıkış yapılıyor...'); // Konsola log yazdır (isteğe bağlı)
-                await FirebaseAuth.instance.signOut(); // Firebase'den çıkış yap
-                print('Başarıyla çıkış yapıldı.');
-
-                // ÖNEMLİ: Başarılı çıkış sonrası main.dart'taki StreamBuilder
-                // değişikliği algılayıp SignInScreen'i otomatik gösterecektir.
-                // Burada Navigator işlemi YAPMAYIN.
-
-                // Kullanıcıya başarı mesajı göster (isteğe bağlı)
-                if (context.mounted) { // context hala geçerli mi kontrol et
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Başarıyla çıkış yapıldı.'),
-                      backgroundColor: Colors.green,
-                      duration: Duration(seconds: 2),
-                    ),
-                  );
-                }
+                await FirebaseAuth.instance.signOut();
               } catch (e) {
-                // Hata olursa konsola yazdır ve kullanıcıya mesaj göster
-                print('Çıkış sırasında hata: $e');
-                if (context.mounted) {
+                if (mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('Çıkış sırasında bir hata oluştu: ${e.toString()}'),
-                      backgroundColor: Theme.of(context).colorScheme.error,
-                    ),
+                    SnackBar(content: Text('Çıkış hatası: ${e.toString()}')),
                   );
                 }
               }
@@ -249,52 +320,97 @@ class _RaceScreenState extends State<RaceScreen> {
           ),
         ],
       ),
-      // Scaffold'un body'si, zorluk seçimine göre değişecek
-      body: selectedDifficulty == null
-          // 1) Zorluk seçilmemişse: İstatistikleri ve zorluk seçme butonlarını göster
-          ? StatsPanel(
-              wins: wins,
-              losses: losses,
-              totalRaces: totalRaces,
-              avgTime: avgTime,
-              bestTime: bestTime,
-              onSelect: selectDifficulty,
-            )
-          // 2) Zorluk seçilmişse: Yarışın durumunu göster
-          : Center(
-              child: Padding( // Kenarlardan biraz boşluk bırakmak için
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    // Giriş yapan kullanıcı bilgisini göster (isteğe bağlı)
-                    Text("Kullanıcı: ${user?.email ?? 'Bilinmiyor'}", style: Theme.of(context).textTheme.bodySmall),
-                    const SizedBox(height: 15),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(_currentRaceStatusMessage, style: textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold), textAlign: TextAlign.center),
+              const SizedBox(height: 8),
+              if (user?.email != null)
+                Text("Yarışçı: ${user!.email}", style: textTheme.bodySmall, textAlign: TextAlign.center),
+              const SizedBox(height: 20),
 
-                    // Yarış bilgileri (mevcut kodunuzdaki gibi)
-                    Text("Süre: ${raceTime.toStringAsFixed(2)} s", style: const TextStyle(fontSize: 18)),
-                    const SizedBox(height: 20),
-                    const Text("🚣 You vs 🤖 Bot", style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-                    const SizedBox(height: 30),
-                    Text("Senin Mesafen: ${playerDistance.toStringAsFixed(2)} m", style: const TextStyle(fontSize: 20)),
-                    const SizedBox(height: 10),
-                    Text("Bot Mesafesi: ${botDistance.toStringAsFixed(2)} m", style: const TextStyle(fontSize: 20)),
-                    const SizedBox(height: 40),
-
-                    // Yarış bittiyse mesaj göster
-                    if (raceOver)
-                      const Text("🏁 Yarış Bitti!", style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.red)),
-                  ],
+              Card(
+                elevation: 3,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    children: [
+                      Text("SÜRE: ${raceTime.toStringAsFixed(2)} s", style: textTheme.headlineMedium?.copyWith(color: colorScheme.primary, fontWeight: FontWeight.bold)),
+                      const SizedBox(height: 20),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: [
+                          Text("SEN", style: textTheme.titleLarge?.copyWith(color: Colors.green[700])),
+                          Text("BOT", style: textTheme.titleLarge?.copyWith(color: Colors.red[700])),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Column(
+                              children: [
+                                Text("${playerDistance.toStringAsFixed(1)}m", style: textTheme.titleMedium),
+                                LinearProgressIndicator(
+                                  value: playerDistance / 100,
+                                  backgroundColor: Colors.green.shade100,
+                                  valueColor: AlwaysStoppedAnimation<Color>(Colors.green.shade700),
+                                  minHeight: 12,
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 8.0),
+                            child: Icon(Icons.rowing, size: 30),
+                          ),
+                          Expanded(
+                            child: Column(
+                              children: [
+                                Text("${botDistance.toStringAsFixed(1)}m", style: textTheme.titleMedium),
+                                LinearProgressIndicator(
+                                  value: botDistance / 100,
+                                  backgroundColor: Colors.red.shade100,
+                                  valueColor: AlwaysStoppedAnimation<Color>(Colors.red.shade700),
+                                  minHeight: 12,
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ),
-      // Arka plan rengini sadece yarış ekranındayken ayarla (isteğe bağlı)
-      backgroundColor: selectedDifficulty != null ? Colors.teal.shade50 : null,
+              const SizedBox(height: 30),
+
+              if (raceOver)
+                Padding(
+                  padding: const EdgeInsets.only(top: 16.0),
+                  child: Text("🏁 YARIŞ BİTTİ! 🏁", style: textTheme.headlineSmall?.copyWith(color: Colors.orangeAccent, fontWeight: FontWeight.bold), textAlign: TextAlign.center),
+                )
+              else if (!raceOver && raceTime > 0.01)
+                 Column(
+                   children: [
+                     Icon(Icons.directions_run, size: 50, color: colorScheme.secondary),
+                     const SizedBox(height: 10),
+                     Text("Kürek Çekmeye Devam!", style: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w600)),
+                   ],
+                 )
+              else if (!raceOver && raceTime < 0.01)
+                const Center(child: CircularProgressIndicator()),
+            ],
+          ),
+        ),
+      ),
     );
   }
-  // --- build Metodu Bitiş ---
 }
-
-// StatsPanel widget'ınızın burada veya ayrı bir dosyada tanımlı olduğunu varsayıyoruz.
-// Eğer aynı dosyadaysa burada kalabilir, değilse import edilmiş olmalı.
-// class StatsPanel extends StatelessWidget { ... }
