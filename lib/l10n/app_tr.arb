@@ -16,5 +16,31 @@
   "save": "Kaydet",
   "personalInformation": "Kişisel Bilgiler",
   "name": "Adınız",
-  "featureComingSoon": "Bu özellik yakında eklenecektir."
+  "featureComingSoon": "Bu özellik yakında eklenecektir.",
+  "logoutTooltip": "Çıkış Yap",
+
+  "difficultyLevelTitle": "Zorluk Seviyesini Seçin",
+  "easy": "Kolay",
+  "medium": "Orta",
+  "hard": "Zor",
+  "difficultyDynamic": "Dinamik", 
+  "lastNMatchesPrompt": "Son kaç maçın ortalaması alınsın?",
+  "exampleHint": "Örn: 3",
+  "confirmAndStartButton": "SEÇİMİ ONAYLA VE BAŞLA",
+  "dynamicDifficultyValidationError": "Dinamik zorluk için lütfen geçerli ve pozitif bir maç sayısı girin.",
+  "raceSettingsTitle": "Yarış Ayarları",
+  "prepareForRaceTitle": "Yarışa Hazırlan",
+
+  "yourStatisticsTitle": "İstatistiklerin",
+  "wins": "Kazandın",
+  "losses": "Kaybettin",
+  "totalRaces": "Toplam Yarış",
+  "avgTime": "Ort. Süre",
+  "bestTime": "En İyi Süre",
+  "notAvailable": "Yok",
+  "startNewRaceTitle": "Yeni Bir Yarışa Başla:",
+  "dynamicDefaultButton": "Dinamik (Varsayılan)",
+  "refreshDataButton": "Verileri Yenile",
+  "timeSeconds": "{time}s",
+  "nameValidationError": "Lütfen adınızı girin."
 }

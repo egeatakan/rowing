@@ -60,4 +60,78 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get featureComingSoon => 'Questa funzione verrà aggiunta presto.';
+
+  @override
+  String get logoutTooltip => 'Esci';
+
+  @override
+  String get difficultyLevelTitle => 'Seleziona Livello Difficoltà';
+
+  @override
+  String get easy => 'Facile';
+
+  @override
+  String get medium => 'Medio';
+
+  @override
+  String get hard => 'Difficile';
+
+  @override
+  String get difficultyDynamic => 'Dinamico';
+
+  @override
+  String get lastNMatchesPrompt => 'Media di quante ultime partite?';
+
+  @override
+  String get exampleHint => 'Es: 3';
+
+  @override
+  String get confirmAndStartButton => 'CONFERMA E INIZIA';
+
+  @override
+  String get dynamicDifficultyValidationError => 'Inserisci un numero valido e positivo di partite per la difficoltà dinamica.';
+
+  @override
+  String get raceSettingsTitle => 'Impostazioni Gara';
+
+  @override
+  String get prepareForRaceTitle => 'Preparati per la Gara';
+
+  @override
+  String get yourStatisticsTitle => 'Le Tue Statistiche';
+
+  @override
+  String get wins => 'Vittorie';
+
+  @override
+  String get losses => 'Sconfitte';
+
+  @override
+  String get totalRaces => 'Gare Totali';
+
+  @override
+  String get avgTime => 'Tempo Medio';
+
+  @override
+  String get bestTime => 'Miglior Tempo';
+
+  @override
+  String get notAvailable => 'N/D';
+
+  @override
+  String get startNewRaceTitle => 'Inizia una Nuova Gara:';
+
+  @override
+  String get dynamicDefaultButton => 'Dinamico (Predefinito)';
+
+  @override
+  String get refreshDataButton => 'Aggiorna Dati';
+
+  @override
+  String timeSeconds(String time) {
+    return '${time}s';
+  }
+
+  @override
+  String get nameValidationError => 'Per favore inserisci il tuo nome.';
 }

@@ -1,13 +1,16 @@
 // lib/difficulty_selection_screen.dart
 import 'package:flutter/material.dart';
-// Aşağıdaki importlar KESİNLİKLE GEREKLİDİR ve dosyaların lib klasöründe olduğunu varsayar:
-// Eğer difficulty_selector.dart ve race_screen.dart dosyalarınız farklı bir klasördeyse
-// (örn: lib/widgets/ veya lib/screens/), bu yolları ona göre güncelleyin.
-import 'difficulty_selector.dart'; // DifficultyLevel enum'ı ve DifficultySelector widget'ı için
-import 'race_screen.dart';       // RaceScreen widget'ı için
-import 'package:firebase_auth/firebase_auth.dart'; // Firebase Auth işlemleri için (çıkış butonu)
+import 'package:firebase_auth/firebase_auth.dart';
+// AppLocalizations importu
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
-// BU SINIFIN ADININ TAM OLARAK "DifficultySelectionScreen" OLDUĞUNDAN EMİN OLUN
+// Bu importların yollarının doğru olduğundan emin olun
+// difficulty_selector.dart dosyanız lib/widgets/ altında veya lib/ ana dizininde olabilir.
+// Proje yapınıza göre yolu düzenleyin.
+import '../difficulty_selector.dart'; // Eğer lib/difficulty_selector.dart ise
+// import '../widgets/difficulty_selector.dart'; // Eğer lib/widgets/difficulty_selector.dart ise
+import 'race_screen.dart'; // race_screen.dart dosyanız lib/screens/ altında olduğunu varsayıyorum
+
 class DifficultySelectionScreen extends StatelessWidget {
   const DifficultySelectionScreen({super.key});
 
@@ -15,25 +18,25 @@ class DifficultySelectionScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final TextTheme textTheme = Theme.of(context).textTheme;
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context)!; // l10n nesnesini al
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Yarış Ayarları'),
+        title: Text(l10n.raceSettingsTitle), // Yerelleştirilmiş başlık
         backgroundColor: colorScheme.primaryContainer,
         actions: [
           IconButton(
             icon: const Icon(Icons.logout),
-            tooltip: 'Çıkış Yap',
+            tooltip: l10n.logoutTooltip, // ARB dosyanızda "logoutTooltip" anahtarı olmalı
             onPressed: () async {
               try {
                 await FirebaseAuth.instance.signOut();
-                // Başarılı çıkış sonrası main.dart'taki StreamBuilder
-                // otomatik olarak SignInScreen'e yönlendirecektir.
+                // Navigasyon main.dart'taki StreamBuilder tarafından yönetilecek
               } catch (e) {
                 if (context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: Text('Çıkış sırasında hata: ${e.toString()}'),
+                      content: Text('Çıkış sırasında hata: ${e.toString()}'), // Bu da yerelleştirilebilir
                       backgroundColor: colorScheme.error,
                     ),
                   );
@@ -53,23 +56,19 @@ class DifficultySelectionScreen extends StatelessWidget {
                 Icon(Icons.settings_suggest, size: 60, color: colorScheme.primary),
                 const SizedBox(height: 16),
                 Text(
-                  "Yarışa Hazırlan",
+                  l10n.prepareForRaceTitle, // Yerelleştirilmiş başlık
                   style: textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 30),
-                // Bu DifficultySelector widget'ının lib/difficulty_selector.dart dosyasında
-                // doğru bir şekilde tanımlandığından emin olun.
+                // DifficultySelector widget'ının doğru import edildiğinden ve
+                // kendisinin de yerelleştirilmiş metinleri kullandığından emin olun.
                 DifficultySelector(
                   onDifficultySelected: (level, numberOfMatches) {
-                    print('DifficultySelectionScreen: Seçilen Zorluk: $level, Dinamik Maç Sayısı: $numberOfMatches');
-
                     Navigator.pushReplacement(
                       context,
                       MaterialPageRoute(
                         builder: (context) => RaceScreen(
-                          // RaceScreen'in constructor'ının bu parametreleri
-                          // aldığından emin olun.
                           newSelectedDifficulty: level,
                           dynamicMatchCount: numberOfMatches,
                         ),

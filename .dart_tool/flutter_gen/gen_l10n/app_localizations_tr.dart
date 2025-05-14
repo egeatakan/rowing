@@ -60,4 +60,78 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get featureComingSoon => 'Bu özellik yakında eklenecektir.';
+
+  @override
+  String get logoutTooltip => 'Çıkış Yap';
+
+  @override
+  String get difficultyLevelTitle => 'Zorluk Seviyesini Seçin';
+
+  @override
+  String get easy => 'Kolay';
+
+  @override
+  String get medium => 'Orta';
+
+  @override
+  String get hard => 'Zor';
+
+  @override
+  String get difficultyDynamic => 'Dinamik';
+
+  @override
+  String get lastNMatchesPrompt => 'Son kaç maçın ortalaması alınsın?';
+
+  @override
+  String get exampleHint => 'Örn: 3';
+
+  @override
+  String get confirmAndStartButton => 'SEÇİMİ ONAYLA VE BAŞLA';
+
+  @override
+  String get dynamicDifficultyValidationError => 'Dinamik zorluk için lütfen geçerli ve pozitif bir maç sayısı girin.';
+
+  @override
+  String get raceSettingsTitle => 'Yarış Ayarları';
+
+  @override
+  String get prepareForRaceTitle => 'Yarışa Hazırlan';
+
+  @override
+  String get yourStatisticsTitle => 'İstatistiklerin';
+
+  @override
+  String get wins => 'Kazandın';
+
+  @override
+  String get losses => 'Kaybettin';
+
+  @override
+  String get totalRaces => 'Toplam Yarış';
+
+  @override
+  String get avgTime => 'Ort. Süre';
+
+  @override
+  String get bestTime => 'En İyi Süre';
+
+  @override
+  String get notAvailable => 'Yok';
+
+  @override
+  String get startNewRaceTitle => 'Yeni Bir Yarışa Başla:';
+
+  @override
+  String get dynamicDefaultButton => 'Dinamik (Varsayılan)';
+
+  @override
+  String get refreshDataButton => 'Verileri Yenile';
+
+  @override
+  String timeSeconds(String time) {
+    return '${time}s';
+  }
+
+  @override
+  String get nameValidationError => 'Lütfen adınızı girin.';
 }

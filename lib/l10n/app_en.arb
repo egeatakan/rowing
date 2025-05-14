@@ -12,7 +12,7 @@
     "description": "Welcome message for the user",
     "placeholders": {
       "userName": {
-        "type": "String", 
+        "type": "String",
         "example": "John Doe"
       }
     }
@@ -25,5 +25,40 @@
   "save": "Save",
   "personalInformation": "Personal Information",
   "name": "Your Name",
-  "featureComingSoon": "This feature will be added soon."
+  "featureComingSoon": "This feature will be added soon.",
+  "logoutTooltip": "Logout",
+
+  "difficultyLevelTitle": "Select Difficulty Level",
+  "easy": "Easy",
+  "medium": "Medium",
+  "hard": "Hard",
+  "difficultyDynamic": "Dynamic", 
+  "lastNMatchesPrompt": "Average of last how many matches?",
+  "exampleHint": "E.g.: 3",
+  "confirmAndStartButton": "CONFIRM AND START",
+  "dynamicDifficultyValidationError": "Please enter a valid positive number of matches for dynamic difficulty.",
+  "raceSettingsTitle": "Race Settings",
+  "prepareForRaceTitle": "Prepare for Race",
+
+  "yourStatisticsTitle": "Your Statistics",
+  "wins": "Wins",
+  "losses": "Losses",
+  "totalRaces": "Total Races",
+  "avgTime": "Avg. Time",
+  "bestTime": "Best Time",
+  "notAvailable": "N/A",
+  "startNewRaceTitle": "Start a New Race:",
+  "dynamicDefaultButton": "Dynamic (Default)",
+  "refreshDataButton": "Refresh Data",
+  "timeSeconds": "{time}s",
+  "@timeSeconds": {
+    "description": "Time in seconds",
+    "placeholders": {
+      "time": {
+        "type": "String",
+        "example": "12.34"
+      }
+    }
+  },
+  "nameValidationError": "Please enter your name."
 }

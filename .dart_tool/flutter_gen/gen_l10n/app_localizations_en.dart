@@ -60,4 +60,78 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get featureComingSoon => 'This feature will be added soon.';
+
+  @override
+  String get logoutTooltip => 'Logout';
+
+  @override
+  String get difficultyLevelTitle => 'Select Difficulty Level';
+
+  @override
+  String get easy => 'Easy';
+
+  @override
+  String get medium => 'Medium';
+
+  @override
+  String get hard => 'Hard';
+
+  @override
+  String get difficultyDynamic => 'Dynamic';
+
+  @override
+  String get lastNMatchesPrompt => 'Average of last how many matches?';
+
+  @override
+  String get exampleHint => 'E.g.: 3';
+
+  @override
+  String get confirmAndStartButton => 'CONFIRM AND START';
+
+  @override
+  String get dynamicDifficultyValidationError => 'Please enter a valid positive number of matches for dynamic difficulty.';
+
+  @override
+  String get raceSettingsTitle => 'Race Settings';
+
+  @override
+  String get prepareForRaceTitle => 'Prepare for Race';
+
+  @override
+  String get yourStatisticsTitle => 'Your Statistics';
+
+  @override
+  String get wins => 'Wins';
+
+  @override
+  String get losses => 'Losses';
+
+  @override
+  String get totalRaces => 'Total Races';
+
+  @override
+  String get avgTime => 'Avg. Time';
+
+  @override
+  String get bestTime => 'Best Time';
+
+  @override
+  String get notAvailable => 'N/A';
+
+  @override
+  String get startNewRaceTitle => 'Start a New Race:';
+
+  @override
+  String get dynamicDefaultButton => 'Dynamic (Default)';
+
+  @override
+  String get refreshDataButton => 'Refresh Data';
+
+  @override
+  String timeSeconds(String time) {
+    return '${time}s';
+  }
+
+  @override
+  String get nameValidationError => 'Please enter your name.';
 }

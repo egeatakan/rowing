@@ -198,6 +198,150 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'This feature will be added soon.'**
   String get featureComingSoon;
+
+  /// No description provided for @logoutTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Logout'**
+  String get logoutTooltip;
+
+  /// No description provided for @difficultyLevelTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Difficulty Level'**
+  String get difficultyLevelTitle;
+
+  /// No description provided for @easy.
+  ///
+  /// In en, this message translates to:
+  /// **'Easy'**
+  String get easy;
+
+  /// No description provided for @medium.
+  ///
+  /// In en, this message translates to:
+  /// **'Medium'**
+  String get medium;
+
+  /// No description provided for @hard.
+  ///
+  /// In en, this message translates to:
+  /// **'Hard'**
+  String get hard;
+
+  /// No description provided for @difficultyDynamic.
+  ///
+  /// In en, this message translates to:
+  /// **'Dynamic'**
+  String get difficultyDynamic;
+
+  /// No description provided for @lastNMatchesPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Average of last how many matches?'**
+  String get lastNMatchesPrompt;
+
+  /// No description provided for @exampleHint.
+  ///
+  /// In en, this message translates to:
+  /// **'E.g.: 3'**
+  String get exampleHint;
+
+  /// No description provided for @confirmAndStartButton.
+  ///
+  /// In en, this message translates to:
+  /// **'CONFIRM AND START'**
+  String get confirmAndStartButton;
+
+  /// No description provided for @dynamicDifficultyValidationError.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a valid positive number of matches for dynamic difficulty.'**
+  String get dynamicDifficultyValidationError;
+
+  /// No description provided for @raceSettingsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Race Settings'**
+  String get raceSettingsTitle;
+
+  /// No description provided for @prepareForRaceTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Prepare for Race'**
+  String get prepareForRaceTitle;
+
+  /// No description provided for @yourStatisticsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your Statistics'**
+  String get yourStatisticsTitle;
+
+  /// No description provided for @wins.
+  ///
+  /// In en, this message translates to:
+  /// **'Wins'**
+  String get wins;
+
+  /// No description provided for @losses.
+  ///
+  /// In en, this message translates to:
+  /// **'Losses'**
+  String get losses;
+
+  /// No description provided for @totalRaces.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Races'**
+  String get totalRaces;
+
+  /// No description provided for @avgTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Avg. Time'**
+  String get avgTime;
+
+  /// No description provided for @bestTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Best Time'**
+  String get bestTime;
+
+  /// No description provided for @notAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'N/A'**
+  String get notAvailable;
+
+  /// No description provided for @startNewRaceTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Start a New Race:'**
+  String get startNewRaceTitle;
+
+  /// No description provided for @dynamicDefaultButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Dynamic (Default)'**
+  String get dynamicDefaultButton;
+
+  /// No description provided for @refreshDataButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh Data'**
+  String get refreshDataButton;
+
+  /// Time in seconds
+  ///
+  /// In en, this message translates to:
+  /// **'{time}s'**
+  String timeSeconds(String time);
+
+  /// No description provided for @nameValidationError.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter your name.'**
+  String get nameValidationError;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

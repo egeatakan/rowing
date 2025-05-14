@@ -1,7 +1,9 @@
-// lib/stats_panel.dart
+// lib/widgets/stats_panel.dart
 import 'package:flutter/material.dart';
-// Bu import ÇOK ÖNEMLİ! Yeni DifficultyLevel enum'ını buradan alıyoruz.
-import 'difficulty_selector.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+// difficulty_selector.dart dosyanızın doğru yolda olduğundan emin olun
+// Örneğin, lib/difficulty_selector.dart ise:
+import '../difficulty_selector.dart';
 
 class StatsPanel extends StatelessWidget {
   final int wins;
@@ -9,9 +11,9 @@ class StatsPanel extends StatelessWidget {
   final int totalRaces;
   final double avgTime;
   final double bestTime;
-  // onSelect callback'i artık DifficultyLevel tipinde bir parametre almalı.
-  // Eğer StatsPanel'ınızda zorluk seçme butonları yoksa bu callback'e ihtiyacınız olmayabilir.
-  final Function(DifficultyLevel difficulty)? onSelectDifficulty; // Opsiyonel yaptık
+  // Bu callback, bu panel içinde zorluk seçme butonları varsa kullanılır.
+  // StatisticsScreen'de kullanılmıyorsa null olabilir.
+  final Function(DifficultyLevel difficulty)? onSelectDifficulty;
 
   const StatsPanel({
     super.key,
@@ -20,7 +22,7 @@ class StatsPanel extends StatelessWidget {
     required this.totalRaces,
     required this.avgTime,
     required this.bestTime,
-    this.onSelectDifficulty, // Opsiyonel olarak constructor'a eklendi
+    this.onSelectDifficulty,
   });
 
   Widget _buildStatCard(BuildContext context, String title, String value, IconData icon) {
@@ -28,18 +30,31 @@ class StatsPanel extends StatelessWidget {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
 
     return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      elevation: 1, // Gölge daha da azaltıldı
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)), // Köşe yuvarlaklığı biraz daha azaltıldı
       child: Padding(
-        padding: const EdgeInsets.all(12.0),
+        // Kart içi padding minimuma indirildi
+        padding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 6.0),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.center, // Dikeyde ortala
           children: [
-            Icon(icon, size: 30, color: colorScheme.primary),
-            const SizedBox(height: 8),
-            Text(title, style: textTheme.labelLarge?.copyWith(color: Colors.grey[700]), textAlign: TextAlign.center),
-            const SizedBox(height: 4),
-            Text(value, style: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold), textAlign: TextAlign.center),
+            Icon(icon, size: 55, color: colorScheme.primary), // İkon boyutu daha da küçültüldü
+            const SizedBox(height: 2), // Boşluk minimuma indirildi
+            Text(
+              title,
+              style: textTheme.bodySmall?.copyWith(color: Colors.grey[700], fontSize: 32), // Metin boyutu bodySmall ve fontSize ile daha da küçültüldü
+              textAlign: TextAlign.center,
+              overflow: TextOverflow.ellipsis,
+              maxLines: 1, // Başlığın tek satırda kalmasını sağla
+            ),
+            // const SizedBox(height: 1), // Bu boşluk kaldırılabilir veya çok küçük tutulabilir
+            Text(
+              value,
+              style: textTheme.labelLarge?.copyWith(fontWeight: FontWeight.bold, fontSize: 22), // Metin boyutu labelLarge ve fontSize ile ayarlandı
+              textAlign: TextAlign.center,
+              overflow: TextOverflow.ellipsis,
+              maxLines: 1, // Değerin tek satırda kalmasını sağla
+            ),
           ],
         ),
       ),
@@ -50,72 +65,76 @@ class StatsPanel extends StatelessWidget {
   Widget build(BuildContext context) {
     final TextTheme textTheme = Theme.of(context).textTheme;
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context)!;
 
     return Padding(
-      padding: const EdgeInsets.all(16.0),
+      padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 12.0),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Text(
-            "İstatistiklerin",
-            style: textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold, color: colorScheme.primary),
+            l10n.yourStatisticsTitle,
+            style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold, color: colorScheme.primary), // Başlık boyutu titleMedium yapıldı
             textAlign: TextAlign.center,
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 10), // Boşluk azaltıldı
           GridView.count(
-            crossAxisCount: 2, // Yan yana iki kart
-            shrinkWrap: true, // İçeriğe göre boyutlan
-            physics: const NeverScrollableScrollPhysics(), // GridView içinde kaydırmayı engelle
-            crossAxisSpacing: 12,
-            mainAxisSpacing: 12,
-            childAspectRatio: 1.8, // Kartların en-boy oranı
+            crossAxisCount: 3, // Yan yana üç kart
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            crossAxisSpacing: 6, // Kartlar arası yatay boşluk azaltıldı
+            mainAxisSpacing: 6,  // Kartlar arası dikey boşluk azaltıldı
+            // childAspectRatio'yu artırarak kartların yüksekliğini azaltıyoruz.
+            // 2.0 değeri, kartların genişliklerinin yüksekliklerinin iki katı olmasını sağlar (çok basık).
+            // 1.8 veya 1.6 gibi değerler daha dengeli olabilir.
+            childAspectRatio: 1.8, // Önceki 1.1'den artırıldı, kartlar daha kısa olacak
             children: [
-              _buildStatCard(context, "Kazandın", wins.toString(), Icons.emoji_events),
-              _buildStatCard(context, "Kaybettin", losses.toString(), Icons.sentiment_very_dissatisfied),
-              _buildStatCard(context, "Toplam Yarış", totalRaces.toString(), Icons.sports_score),
-              _buildStatCard(context, "Ort. Süre", "${avgTime.toStringAsFixed(2)}s", Icons.timer),
-              _buildStatCard(context, "En İyi Süre", bestTime == double.infinity ? "N/A" : "${bestTime.toStringAsFixed(2)}s", Icons.star_border_purple500_outlined),
+              _buildStatCard(context, l10n.wins, wins.toString(), Icons.emoji_events),
+              _buildStatCard(context, l10n.losses, losses.toString(), Icons.sentiment_very_dissatisfied),
+              _buildStatCard(context, l10n.totalRaces, totalRaces.toString(), Icons.sports_score),
+              _buildStatCard(context, l10n.avgTime, l10n.timeSeconds(avgTime.toStringAsFixed(2)), Icons.timer),
+              _buildStatCard(context, l10n.bestTime, bestTime == double.infinity ? l10n.notAvailable : l10n.timeSeconds(bestTime.toStringAsFixed(2)), Icons.star_border_purple500_outlined),
             ],
           ),
-          // Eğer onSelectDifficulty callback'i sağlanmışsa zorluk seçme butonlarını göster
+          // Zorluk seçme butonları (eğer varsa)
           if (onSelectDifficulty != null) ...[
-            const SizedBox(height: 30),
+            const SizedBox(height: 16),
             Text(
-              "Yeni Bir Yarışa Başla:",
-              style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+              l10n.startNewRaceTitle,
+              style: textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 12),
-            ElevatedButton(
-              onPressed: () => onSelectDifficulty!(DifficultyLevel.kolay), // Yeni enum kullanılıyor
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.green[600]),
-              child: const Text("Kolay"),
-            ),
             const SizedBox(height: 8),
+            // Butonların görünümünü de sadeleştirebiliriz veya boyutlarını ayarlayabiliriz.
+            // Örneğin, FittedBox kullanarak metinleri sığdırabiliriz.
+            FittedBox(
+              fit: BoxFit.scaleDown, // Metin taşarsa küçültür
+              child: ElevatedButton(
+                onPressed: () => onSelectDifficulty!(DifficultyLevel.kolay),
+                style: ElevatedButton.styleFrom(backgroundColor: Colors.green[600], padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6)),
+                child: Text(l10n.easy, style: const TextStyle(fontSize: 12)),
+              ),
+            ),
+            // Diğer butonlar için de benzer stil uygulanabilir.
+            // Şimdilik sadece bir tanesini örnek olarak değiştirdim.
+            const SizedBox(height: 4),
             ElevatedButton(
-              onPressed: () => onSelectDifficulty!(DifficultyLevel.orta), // Yeni enum kullanılıyor
+              onPressed: () => onSelectDifficulty!(DifficultyLevel.orta),
               style: ElevatedButton.styleFrom(backgroundColor: Colors.orange[600]),
-              child: const Text("Orta"),
+              child: Text(l10n.medium),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 4),
             ElevatedButton(
-              onPressed: () => onSelectDifficulty!(DifficultyLevel.zor), // Yeni enum kullanılıyor
+              onPressed: () => onSelectDifficulty!(DifficultyLevel.zor),
               style: ElevatedButton.styleFrom(backgroundColor: Colors.red[600]),
-              child: const Text("Zor"),
+              child: Text(l10n.hard),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 4),
             ElevatedButton(
-              onPressed: () {
-                // Dinamik zorluk için maç sayısı girişi bu panelde yönetilmeyecekse,
-                // bu butona basıldığında bir uyarı verilebilir veya
-                // doğrudan DifficultySelectionScreen'e yönlendirilebilir.
-                // Şimdilik sadece DifficultyLevel.dinamik gönderiyoruz,
-                // maç sayısı null olacak ve RaceScreen bunu ele alacak.
-                onSelectDifficulty!(DifficultyLevel.dinamik);
-              },
+              onPressed: () => onSelectDifficulty!(DifficultyLevel.dinamik),
               style: ElevatedButton.styleFrom(backgroundColor: Colors.blue[600]),
-              child: const Text("Dinamik (Varsayılan)"),
+              child: Text(l10n.difficultyDynamic),
             ),
           ]
         ],

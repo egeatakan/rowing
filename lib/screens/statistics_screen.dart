@@ -1,10 +1,11 @@
 // lib/screens/statistics_screen.dart
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+// AppLocalizations importu
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 // StatsPanel widget'ını ve DifficultyLevel enum'ını içeren dosyayı import edin
-// (DifficultyLevel burada doğrudan kullanılmayacak ama StatsPanel'ın bağımlılığı olabilir)
-import '../stats_panel.dart'; // Eğer widgets klasöründeyse
-// import 'difficulty_selector.dart'; // Eğer DifficultyLevel enum'ı burada tanımlıysa
+// Bu dosyanın konumuna göre yolu ayarlayın. Örneğin lib/widgets/stats_panel.dart ise:
+import '../stats_panel.dart';
 
 class StatisticsScreen extends StatefulWidget {
   const StatisticsScreen({super.key});
@@ -48,35 +49,39 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
   @override
   Widget build(BuildContext context) {
     final double avgTime = _totalRaces > 0 ? _totalTime / _totalRaces : 0.0;
+    final l10n = AppLocalizations.of(context)!; // l10n nesnesini al
+    final theme = Theme.of(context);
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text("İstatistiklerim"),
-        backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+        title: Text(l10n.statisticsTitle), // Yerelleştirilmiş başlık
+        backgroundColor: theme.colorScheme.primaryContainer,
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
-          : RefreshIndicator( // Aşağı çekerek yenileme özelliği
+          : RefreshIndicator(
               onRefresh: _loadStats,
-              child: ListView( // Kaydırılabilir içerik için ListView
-                padding: const EdgeInsets.all(8.0), // StatsPanel zaten padding içeriyor olabilir
+              child: ListView(
+                padding: const EdgeInsets.all(0), // StatsPanel kendi padding'ini yönetiyor
                 children: [
-                  StatsPanel(
+                  StatsPanel( // Bu widget artık yerelleştirilmiş metinleri kullanıyor
                     wins: _wins,
                     losses: _losses,
                     totalRaces: _totalRaces,
                     avgTime: avgTime,
                     bestTime: _bestTime,
-                    // onSelectDifficulty callback'i burada GEREKLİ DEĞİL,
-                    // çünkü bu sayfa sadece istatistik gösteriyor.
-                    // StatsPanel'ın constructor'ında onSelectDifficulty opsiyonel olmalı.
+                    // Bu ekranda zorluk seçme butonları olmadığı için onSelectDifficulty gönderilmiyor.
                   ),
                   const SizedBox(height: 20),
-                  Center(
+                  Padding( // Butonu biraz ortalamak ve kenarlardan boşluk bırakmak için
+                    padding: const EdgeInsets.symmetric(horizontal: 60.0),
                     child: ElevatedButton.icon(
                       icon: const Icon(Icons.refresh),
-                      label: const Text("Verileri Yenile"),
+                      label: Text(l10n.refreshDataButton), // Yerelleştirilmiş metin
                       onPressed: _loadStats,
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 12)
+                      ),
                     ),
                   )
                 ],

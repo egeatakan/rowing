@@ -16,5 +16,31 @@
   "save": "Salva",
   "personalInformation": "Informazioni Personali",
   "name": "Il Tuo Nome",
-  "featureComingSoon": "Questa funzione verrà aggiunta presto."
+  "featureComingSoon": "Questa funzione verrà aggiunta presto.",
+  "logoutTooltip": "Esci",
+
+  "difficultyLevelTitle": "Seleziona Livello Difficoltà",
+  "easy": "Facile",
+  "medium": "Medio",
+  "hard": "Difficile",
+  "difficultyDynamic": "Dinamico", 
+  "lastNMatchesPrompt": "Media di quante ultime partite?",
+  "exampleHint": "Es: 3",
+  "confirmAndStartButton": "CONFERMA E INIZIA",
+  "dynamicDifficultyValidationError": "Inserisci un numero valido e positivo di partite per la difficoltà dinamica.",
+  "raceSettingsTitle": "Impostazioni Gara",
+  "prepareForRaceTitle": "Preparati per la Gara",
+
+  "yourStatisticsTitle": "Le Tue Statistiche",
+  "wins": "Vittorie",
+  "losses": "Sconfitte",
+  "totalRaces": "Gare Totali",
+  "avgTime": "Tempo Medio",
+  "bestTime": "Miglior Tempo",
+  "notAvailable": "N/D",
+  "startNewRaceTitle": "Inizia una Nuova Gara:",
+  "dynamicDefaultButton": "Dinamico (Predefinito)",
+  "refreshDataButton": "Aggiorna Dati",
+  "timeSeconds": "{time}s",
+  "nameValidationError": "Per favore inserisci il tuo nome."
 }
