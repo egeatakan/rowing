@@ -3,26 +3,31 @@ import 'package:flutter/material.dart';
 import 'package:sensors_plus/sensors_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'difficulty_selection_screen.dart';
-// BU IMPORT SATIRI ÇOK ÖNEMLİ!
-// DifficultyLevel enum'ını ve dolayısıyla newSelectedDifficulty parametresinin tipini buradan alır.
-// lib/difficulty_selector.dart dosyanızın var olduğundan ve DifficultyLevel enum'ını içerdiğinden emin olun.
-import 'difficulty_selector.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
-// StatsPanel bu ekranda doğrudan kullanılmıyor, ancak istatistikler için
-// ayrı bir ekranınız varsa veya farklı bir mantıkla kullanıyorsanız bu import kalabilir.
-// import 'stats_panel.dart';
+// difficulty_selector.dart dosyanızın doğru yolda olduğundan emin olun
+// Örneğin, lib/difficulty_selector.dart ise:
+import '../difficulty_selector.dart';
+// Eğer lib/widgets/difficulty_selector.dart ise:
+// import '../widgets/difficulty_selector.dart';
+
+
+// DifficultySelectionScreen importu, yarış sonu dialog'undaki butonların yönlendirmesi için.
+// Dosya yolunuzu kontrol edin.
+// Eğer lib/screens/difficulty_selection_screen.dart ise:
+import 'difficulty_selection_screen.dart';
+// Eğer lib/difficulty_selection_screen.dart ise:
+// import '../difficulty_selection_screen.dart';
+
 
 class RaceScreen extends StatefulWidget {
-  // DifficultySelectionScreen'den gelen parametreler:
-  // BU CONSTRUCTOR'IN DOĞRU OLDUĞUNDAN EMİN OLUN:
-  final DifficultyLevel newSelectedDifficulty; // Tipi DifficultyLevel olmalı
+  final DifficultyLevel newSelectedDifficulty;
   final int? dynamicMatchCount;
 
   const RaceScreen({
     super.key,
-    required this.newSelectedDifficulty, // Bu parametre zorunlu
-    this.dynamicMatchCount, // Bu parametre opsiyonel (null olabilir)
+    required this.newSelectedDifficulty,
+    this.dynamicMatchCount,
   });
 
   @override
@@ -30,7 +35,6 @@ class RaceScreen extends StatefulWidget {
 }
 
 class _RaceScreenState extends State<RaceScreen> {
-  // --- State Değişkenleri ---
   double playerDistance = 0;
   double botDistance = 0;
   double previousZ = 0;
@@ -40,7 +44,7 @@ class _RaceScreenState extends State<RaceScreen> {
   Timer? raceTimer;
   double raceTime = 0.0;
   StreamSubscription<AccelerometerEvent>? sensorSubscription;
-  double botSpeed = 5.0; // Varsayılan bot hızı, initState'te güncellenecek
+  double botSpeed = 5.0; // Varsayılan bot hızı
 
   int wins = 0;
   int losses = 0;
@@ -48,23 +52,42 @@ class _RaceScreenState extends State<RaceScreen> {
   double totalTime = 0.0;
   double bestTime = double.infinity;
   String _currentRaceStatusMessage = "Yarış bilgileri yükleniyor...";
+  String _winner = "";
+  bool _isLoadingDifficulty = false;
 
   @override
   void initState() {
     super.initState();
-    _initializeRaceParameters(); // Yarış parametrelerini widget'tan gelen değere göre ayarla
-    loadStats(); // Kayıtlı istatistikleri yükle
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted && !raceOver) {
-        startRace();
-      }
-    });
+    _setupRace();
+    loadStats();
   }
 
-  void _initializeRaceParameters() {
-    // Gelen zorluk seviyesine göre bot hızını ve diğer parametreleri ayarla
-    // widget.newSelectedDifficulty burada kullanılır.
+  Future<void> _setupRace() async {
+    if (!mounted) return;
+    setState(() {
+      _isLoadingDifficulty = true;
+      _currentRaceStatusMessage = "Zorluk ayarları yükleniyor...";
+    });
+
+    await _initializeRaceParameters();
+
+    if (mounted) {
+      setState(() {
+        _isLoadingDifficulty = false;
+      });
+      if (!raceOver) {
+        startRace();
+      }
+    }
+  }
+
+  Future<void> _initializeRaceParameters() async {
+    print("--- _initializeRaceParameters BAŞLADI ---");
+    print("Seçilen Zorluk: ${widget.newSelectedDifficulty}");
+    if (widget.newSelectedDifficulty == DifficultyLevel.dinamik) {
+      print("Dinamik Zorluk Maç Sayısı İsteği: ${widget.dynamicMatchCount}");
+    }
+
     switch (widget.newSelectedDifficulty) {
       case DifficultyLevel.kolay:
         botSpeed = 3.3;
@@ -80,32 +103,99 @@ class _RaceScreenState extends State<RaceScreen> {
         break;
       case DifficultyLevel.dinamik:
         _currentRaceStatusMessage = "Dinamik Zorluk Hesaplanıyor...";
-        print('Dinamik zorluk seçildi. Maç sayısı: ${widget.dynamicMatchCount}');
+        if (mounted) setState(() {});
+
+        final user = FirebaseAuth.instance.currentUser;
+        if (user == null) {
+          print("Dinamik zorluk için kullanıcı girişi gerekli. Varsayılan Orta hız (5.5) ayarlandı.");
+          botSpeed = 5.5;
+          _currentRaceStatusMessage = "Giriş yapılmamış, Orta seviyede yarış başlıyor!";
+          break;
+        }
+
+        print("Kullanıcı UID: ${user.uid}");
         if (widget.dynamicMatchCount != null && widget.dynamicMatchCount! > 0) {
-          // TODO: Firebase Firestore'dan son 'widget.dynamicMatchCount' maçın
-          // hız/süre verilerini çek. Bu işlem asenkron olmalı.
-          // Çekilen verilerden ortalama bir hız hesapla.
-          // botSpeed = hesaplananOrtalamaHiz;
-          botSpeed = 4.5; // Placeholder
-          _currentRaceStatusMessage = "Dinamik Zorluk (Son ${widget.dynamicMatchCount} Maç Ort.) ile Yarış Başlıyor!";
-          print('TODO: Firebase\'den son ${widget.dynamicMatchCount} maçın ortalama hızını çek ve botSpeed\'e ata.');
-        } else {
-          botSpeed = 5.5; // Varsayılan orta
-          _currentRaceStatusMessage = "Dinamik zorluk için yetersiz veri, Orta seviyede yarış başlıyor!";
-          print('Dinamik zorluk için geçerli maç sayısı yok, varsayılan hız (5.5) ayarlandı.');
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            if(mounted) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Dinamik zorluk için yeterli maç geçmişi bulunamadı. Orta seviyede başlatılıyor.')),
-              );
+          try {
+            print("Firestore'dan son ${widget.dynamicMatchCount} maç çekiliyor...");
+            QuerySnapshot matchHistorySnapshot = await FirebaseFirestore.instance
+                .collection('userMatches')
+                .doc(user.uid)
+                .collection('matches')
+                .orderBy('timestamp', descending: true)
+                .limit(widget.dynamicMatchCount!)
+                .get();
+
+            print("Firestore'dan ${matchHistorySnapshot.docs.length} adet maç dokümanı çekildi.");
+
+            if (matchHistorySnapshot.docs.isNotEmpty) {
+              double totalRaceTime = 0;
+              int validMatchesCount = 0;
+              for (var i = 0; i < matchHistorySnapshot.docs.length; i++) {
+                final doc = matchHistorySnapshot.docs[i];
+                final data = doc.data() as Map<String, dynamic>?;
+                if (data != null && data.containsKey('raceTime') && data['raceTime'] is num) {
+                  double currentMatchTime = (data['raceTime'] as num).toDouble();
+                  print("Maç ${i+1} Süresi: $currentMatchTime s");
+                  totalRaceTime += currentMatchTime;
+                  validMatchesCount++;
+                } else {
+                  print("Maç ${i+1} geçersiz raceTime verisi içeriyor veya raceTime yok. Atlanıyor. Data: $data");
+                }
+              }
+              print("Toplam geçerli maç sayısı: $validMatchesCount, Toplam süre: $totalRaceTime s");
+
+              if (validMatchesCount > 0) {
+                double averageRaceTime = totalRaceTime / validMatchesCount;
+                print("Hesaplanan Ortalama Yarış Süresi: $averageRaceTime s");
+
+                if (averageRaceTime > 0) {
+                  double calculatedBotSpeed = 100 / averageRaceTime; // 100 metrelik yarış için
+                  print("Hesaplanan Ham Bot Hızı (100/ortalamaSüre): $calculatedBotSpeed m/s");
+
+                  // MAKSİMUM HIZ SINIRI KALDIRILDI, SADECE MİNİMUM SINIR KALDI
+                  botSpeed = calculatedBotSpeed.clamp(3.0, double.infinity); // Min 3.0 m/s, maksimum sınır yok
+                  // Eğer yine de bir üst sınır isterseniz, örneğin 15.0 m/s:
+                  // botSpeed = calculatedBotSpeed.clamp(3.0, 15.0);
+                  print("Sınırlandırılmış (Min 3.0) Bot Hızı: $botSpeed m/s");
+
+                  _currentRaceStatusMessage = "Dinamik Zorluk (Son $validMatchesCount Maç Ort.)! Bot Hızı: ${botSpeed.toStringAsFixed(1)} m/s";
+                } else {
+                  botSpeed = 5.0;
+                  _currentRaceStatusMessage = "Dinamik zorluk için geçersiz ortalama süre, Ortalama hız (5.0) ile yarış başlıyor!";
+                  print("Ortalama süre <= 0, varsayılan bot hızı (5.0) ayarlandı.");
+                }
+              } else {
+                botSpeed = 5.0;
+                _currentRaceStatusMessage = "Dinamik zorluk için geçerli maç verisi bulunamadı, Ortalama hız (5.0) ile yarış başlıyor!";
+                print("Geçerli maç sayısı 0, varsayılan bot hızı (5.0) ayarlandı.");
+              }
+            } else {
+              botSpeed = 5.5;
+              _currentRaceStatusMessage = "Hiç maç geçmişiniz yok, Orta seviyede yarış başlıyor!";
+              print("Hiç maç geçmişi bulunamadı, varsayılan bot hızı (5.5) ayarlandı.");
+              if (mounted) {
+                 WidgetsBinding.instance.addPostFrameCallback((_) {
+                    if(mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Dinamik zorluk için hiç maç geçmişiniz bulunamadı. Orta seviyede başlatılıyor.')),
+                      );
+                    }
+                  });
+              }
             }
-          });
+          } catch (e) {
+            print("Firestore'dan maç geçmişi okunurken HATA: $e");
+            botSpeed = 5.5;
+            _currentRaceStatusMessage = "Maç geçmişi okunurken hata oluştu, Orta seviyede yarış başlıyor!";
+          }
+        } else {
+          botSpeed = 5.5;
+          _currentRaceStatusMessage = "Dinamik zorluk için maç sayısı belirtilmemiş, Orta seviyede yarış başlıyor!";
+          print("Dinamik maç sayısı null veya <=0, varsayılan bot hızı (5.5) ayarlandı.");
         }
         break;
     }
-    if (mounted) {
-        setState(() {}); // _currentRaceStatusMessage ve botSpeed güncellendiği için UI'ı yenile
-    }
+    print("--- _initializeRaceParameters BİTTİ --- Bot Hızı: $botSpeed, Mesaj: $_currentRaceStatusMessage");
   }
 
   Future<void> loadStats() async {
@@ -130,17 +220,48 @@ class _RaceScreenState extends State<RaceScreen> {
     if (bestTime != double.infinity) {
       await prefs.setDouble('bestTime', bestTime);
     }
-    // TODO: Firebase'e maç sonucunu kaydetme mantığı eklenecek.
+  }
+
+  Future<void> _saveMatchResultToFirestore(String winner) async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      print("Kullanıcı girişi yapılmamış, Firestore'a kayıt yapılamadı.");
+      return;
+    }
+    try {
+      await FirebaseFirestore.instance
+          .collection('userMatches')
+          .doc(user.uid)
+          .collection('matches')
+          .add({
+        'timestamp': FieldValue.serverTimestamp(),
+        'raceTime': raceTime,
+        'difficulty': widget.newSelectedDifficulty.name,
+        'dynamicMatchCount': widget.newSelectedDifficulty == DifficultyLevel.dinamik
+            ? widget.dynamicMatchCount
+            : null,
+        'won': winner == "You",
+      });
+      print("Yarış sonucu Firestore'a başarıyla kaydedildi. Süre: $raceTime s");
+    } catch (e) {
+      print("Firestore'a yarış sonucu kaydedilirken hata oluştu: $e");
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Yarış sonucu kaydedilirken bir hata oluştu: ${e.toString()}')),
+        );
+      }
+    }
   }
 
   void startRace() {
-    if (!mounted) return;
+    if (!mounted || _isLoadingDifficulty) return;
     setState(() {
       raceOver = false;
       botDistance = 0;
       playerDistance = 0;
       firstRead = true;
       raceTime = 0.0;
+      _winner = "";
     });
 
     raceTimer?.cancel();
@@ -175,7 +296,8 @@ class _RaceScreenState extends State<RaceScreen> {
         setState(() {
           playerDistance += diff * 0.08;
           if (playerDistance >= 100 && !raceOver) {
-            finishRace("You");
+            _winner = "You";
+            finishRace(_winner);
           }
         });
       }
@@ -189,7 +311,8 @@ class _RaceScreenState extends State<RaceScreen> {
       setState(() {
         botDistance += botSpeed;
         if (botDistance >= 100 && !raceOver) {
-          finishRace("Bot");
+          _winner = "Bot";
+          finishRace(_winner);
         }
       });
     });
@@ -222,6 +345,7 @@ class _RaceScreenState extends State<RaceScreen> {
       });
     }
     await saveStats();
+    await _saveMatchResultToFirestore(winner);
 
     if (mounted) {
       showDialog(
@@ -235,9 +359,6 @@ class _RaceScreenState extends State<RaceScreen> {
               onPressed: () {
                 Navigator.of(context).pop();
                 if (mounted) {
-                  // DifficultySelectionScreen'e geri dönmek için import etmeniz gerekebilir.
-                  // Eğer DifficultySelectionScreen'i import etmediyseniz, bu satır hata verecektir.
-                  // import 'difficulty_selection_screen.dart'; // Gerekirse ekleyin
                   Navigator.of(context).pushReplacement(
                     MaterialPageRoute(builder: (context) => const DifficultySelectionScreen()),
                   );
@@ -265,9 +386,29 @@ class _RaceScreenState extends State<RaceScreen> {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
     final TextTheme textTheme = Theme.of(context).textTheme;
 
+    if (_isLoadingDifficulty) {
+      return Scaffold(
+        appBar: AppBar(
+          title: Text(widget.newSelectedDifficulty == DifficultyLevel.dinamik
+              ? 'DİNAMİK ZORLUK' // Veya yerelleştirilmiş
+              : '${widget.newSelectedDifficulty.name.toUpperCase()} SEVİYE YARIŞ'),
+          backgroundColor: colorScheme.primaryContainer,
+        ),
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const CircularProgressIndicator(),
+              const SizedBox(height: 20),
+              Text(_currentRaceStatusMessage, style: textTheme.titleMedium),
+            ],
+          ),
+        ),
+      );
+    }
+
     return Scaffold(
       appBar: AppBar(
-        // widget.newSelectedDifficulty burada kullanılır
         title: Text('${widget.newSelectedDifficulty.name.toUpperCase()} Seviye Yarış'),
         backgroundColor: colorScheme.primaryContainer,
         actions: [
@@ -405,8 +546,8 @@ class _RaceScreenState extends State<RaceScreen> {
                      Text("Kürek Çekmeye Devam!", style: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w600)),
                    ],
                  )
-              else if (!raceOver && raceTime < 0.01)
-                const Center(child: CircularProgressIndicator()),
+              else if (!raceOver && raceTime < 0.01 && !_isLoadingDifficulty)
+                 const Center(child: Text("Yarış Başlamak Üzere...")),
             ],
           ),
         ),
