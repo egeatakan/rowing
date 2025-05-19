@@ -23,7 +23,7 @@
   "easy": "Facile",
   "medium": "Medio",
   "hard": "Difficile",
-  "difficultyDynamic": "Dinamico", 
+  "difficultyDynamic": "Dinamico",
   "lastNMatchesPrompt": "Media di quante ultime partite?",
   "exampleHint": "Es: 3",
   "confirmAndStartButton": "CONFERMA E INIZIA",
@@ -42,5 +42,13 @@
   "dynamicDefaultButton": "Dinamico (Predefinito)",
   "refreshDataButton": "Aggiorna Dati",
   "timeSeconds": "{time}s",
-  "nameValidationError": "Per favore inserisci il tuo nome."
+  "nameValidationError": "Per favore inserisci il tuo nome.",
+
+  "age": "Età",
+  "height": "Altezza (cm)",
+  "weight": "Peso (kg)",
+  "pleaseEnterAge": "Per favore inserisci la tua età.",
+  "pleaseEnterHeight": "Per favore inserisci la tua altezza in cm.",
+  "pleaseEnterWeight": "Per favore inserisci il tuo peso in kg.",
+  "numericValidationError": "Per favore inserisci un numero valido."
 }

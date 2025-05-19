@@ -134,4 +134,25 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get nameValidationError => 'Lütfen adınızı girin.';
+
+  @override
+  String get age => 'Yaş';
+
+  @override
+  String get height => 'Boy (cm)';
+
+  @override
+  String get weight => 'Kilo (kg)';
+
+  @override
+  String get pleaseEnterAge => 'Lütfen yaşınızı girin.';
+
+  @override
+  String get pleaseEnterHeight => 'Lütfen boyunuzu cm cinsinden girin.';
+
+  @override
+  String get pleaseEnterWeight => 'Lütfen kilonuzu kg cinsinden girin.';
+
+  @override
+  String get numericValidationError => 'Lütfen geçerli bir sayı girin.';
 }

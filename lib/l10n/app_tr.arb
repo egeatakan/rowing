@@ -23,7 +23,7 @@
   "easy": "Kolay",
   "medium": "Orta",
   "hard": "Zor",
-  "difficultyDynamic": "Dinamik", 
+  "difficultyDynamic": "Dinamik",
   "lastNMatchesPrompt": "Son kaç maçın ortalaması alınsın?",
   "exampleHint": "Örn: 3",
   "confirmAndStartButton": "SEÇİMİ ONAYLA VE BAŞLA",
@@ -42,5 +42,13 @@
   "dynamicDefaultButton": "Dinamik (Varsayılan)",
   "refreshDataButton": "Verileri Yenile",
   "timeSeconds": "{time}s",
-  "nameValidationError": "Lütfen adınızı girin."
+  "nameValidationError": "Lütfen adınızı girin.",
+
+  "age": "Yaş",
+  "height": "Boy (cm)",
+  "weight": "Kilo (kg)",
+  "pleaseEnterAge": "Lütfen yaşınızı girin.",
+  "pleaseEnterHeight": "Lütfen boyunuzu cm cinsinden girin.",
+  "pleaseEnterWeight": "Lütfen kilonuzu kg cinsinden girin.",
+  "numericValidationError": "Lütfen geçerli bir sayı girin."
 }

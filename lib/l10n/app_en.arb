@@ -32,7 +32,7 @@
   "easy": "Easy",
   "medium": "Medium",
   "hard": "Hard",
-  "difficultyDynamic": "Dynamic", 
+  "difficultyDynamic": "Dynamic",
   "lastNMatchesPrompt": "Average of last how many matches?",
   "exampleHint": "E.g.: 3",
   "confirmAndStartButton": "CONFIRM AND START",
@@ -60,5 +60,13 @@
       }
     }
   },
-  "nameValidationError": "Please enter your name."
+  "nameValidationError": "Please enter your name.",
+
+  "age": "Age",
+  "height": "Height (cm)",
+  "weight": "Weight (kg)",
+  "pleaseEnterAge": "Please enter your age.",
+  "pleaseEnterHeight": "Please enter your height in cm.",
+  "pleaseEnterWeight": "Please enter your weight in kg.",
+  "numericValidationError": "Please enter a valid number."
 }

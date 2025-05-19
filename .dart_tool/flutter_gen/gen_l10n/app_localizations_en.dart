@@ -134,4 +134,25 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get nameValidationError => 'Please enter your name.';
+
+  @override
+  String get age => 'Age';
+
+  @override
+  String get height => 'Height (cm)';
+
+  @override
+  String get weight => 'Weight (kg)';
+
+  @override
+  String get pleaseEnterAge => 'Please enter your age.';
+
+  @override
+  String get pleaseEnterHeight => 'Please enter your height in cm.';
+
+  @override
+  String get pleaseEnterWeight => 'Please enter your weight in kg.';
+
+  @override
+  String get numericValidationError => 'Please enter a valid number.';
 }

@@ -342,6 +342,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Please enter your name.'**
   String get nameValidationError;
+
+  /// No description provided for @age.
+  ///
+  /// In en, this message translates to:
+  /// **'Age'**
+  String get age;
+
+  /// No description provided for @height.
+  ///
+  /// In en, this message translates to:
+  /// **'Height (cm)'**
+  String get height;
+
+  /// No description provided for @weight.
+  ///
+  /// In en, this message translates to:
+  /// **'Weight (kg)'**
+  String get weight;
+
+  /// No description provided for @pleaseEnterAge.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter your age.'**
+  String get pleaseEnterAge;
+
+  /// No description provided for @pleaseEnterHeight.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter your height in cm.'**
+  String get pleaseEnterHeight;
+
+  /// No description provided for @pleaseEnterWeight.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter your weight in kg.'**
+  String get pleaseEnterWeight;
+
+  /// No description provided for @numericValidationError.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a valid number.'**
+  String get numericValidationError;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

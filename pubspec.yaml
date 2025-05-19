@@ -4,30 +4,32 @@ publish_to: 'none'
 version: 1.0.0+1
 
 environment:
-  sdk: '>=3.0.0 <4.0.0' # Genellikle bu şekilde daha geniş bir aralık verilir, sizdeki ^3.7.2 de kalabilir.
+  sdk: '>=3.0.0 <4.0.0' # Sizin sdk aralığınız '>=3.7.2' idi, onu da kullanabilirsiniz.
 
 dependencies:
   flutter:
     sdk: flutter
-  sensors_plus: ^3.0.0 # Bu sürümleri de güncelleyebilirsiniz, ama şimdilik intl'ye odaklanalım
+  sensors_plus: ^3.0.0
   shared_preferences: ^2.2.2
   firebase_core: ^2.31.0
-  firebase_auth: ^4.19.0 # Clerk kullanıyorsanız bunu kaldırabilirsiniz.
-  cloud_firestore: ^4.17.3 # Bir önceki mesajda bu sürümü konuşmuştuk, sizde 5.6.7 idi, hangisiyle devam etmek isterseniz.
+  firebase_auth: ^4.19.0
+  cloud_firestore: ^4.17.3 # Sizin sürümünüz ^5.6.7 idi, onu kullanmaya devam edin.
   
   flutter_localizations:
     sdk: flutter
-  # intl paketinin sürümünü flutter_localizations'ın istediği sürüme yükseltin.
-  # Flutter SDK'sı intl 0.19.0'a sabitlenmişse, bunu kullanmak en iyisidir.
-  intl: ^0.19.0 # <-- DEĞİŞİKLİK BURADA (0.18.0 yerine 0.19.0)
+  intl: ^0.19.0 
 
   cupertino_icons: ^1.0.8
-  clerk_flutter: ^0.0.9-beta # Firebase Auth kullanıyorsanız bunu kaldırabilirsiniz.
+  clerk_flutter: ^0.0.9-beta # Eğer Firebase Auth ana çözümünüzse bunu kaldırabilirsiniz.
+
+  # YENİ EKLENEN PAKETLER (Profil fotoğrafı için)
+  image_picker: ^1.1.2    # En son sürümü pub.dev'den kontrol edin veya flutter pub add ile ekleyin
+  firebase_storage: ^11.7.5 # En son sürümü pub.dev'den kontrol edin veya flutter pub add ile ekleyin
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^3.0.0 # Örnek sürüm, sizdeki 5.0.0 daha güncel.
+  flutter_lints: ^3.0.0 # Sizin sürümünüz ^5.0.0 idi, onu kullanmaya devam edin.
 
 flutter:
   uses-material-design: true
