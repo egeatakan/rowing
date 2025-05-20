@@ -128,7 +128,7 @@ class _MyAppState extends State<MyApp> {
         appBarTheme: AppBarTheme(
           backgroundColor: Colors.lightBlueAccent.shade100,
           elevation: 2,
-          titleTextStyle: TextStyle(
+          titleTextStyle: const TextStyle(
             color: Colors.black87,
             fontSize: 20,
             fontWeight: FontWeight.w500,
@@ -162,7 +162,7 @@ class _MyAppState extends State<MyApp> {
 //===================================================================
 // Bu widget'ı lib/screens/sign_in_screen.dart gibi ayrı bir dosyaya taşımanız önerilir.
 class SignInScreen extends StatefulWidget {
-  const SignInScreen({Key? key}) : super(key: key);
+  const SignInScreen({super.key});
 
   @override
   State<SignInScreen> createState() => _SignInScreenState();

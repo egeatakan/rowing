@@ -5,20 +5,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-// difficulty_selector.dart dosyanızın doğru yolda olduğundan emin olun
-// Örneğin, lib/difficulty_selector.dart ise:
 import '../difficulty_selector.dart';
-// Eğer lib/widgets/difficulty_selector.dart ise:
-// import '../widgets/difficulty_selector.dart';
-
-
-// DifficultySelectionScreen importu, yarış sonu dialog'undaki butonların yönlendirmesi için.
-// Dosya yolunuzu kontrol edin.
-// Eğer lib/screens/difficulty_selection_screen.dart ise:
 import 'difficulty_selection_screen.dart';
-// Eğer lib/difficulty_selection_screen.dart ise:
-// import '../difficulty_selection_screen.dart';
-
 
 class RaceScreen extends StatefulWidget {
   final DifficultyLevel newSelectedDifficulty;
@@ -35,24 +23,37 @@ class RaceScreen extends StatefulWidget {
 }
 
 class _RaceScreenState extends State<RaceScreen> {
+  // Yarış durumu
   double playerDistance = 0;
   double botDistance = 0;
+  double raceTime = 0.0; // Yarışın başından beri geçen toplam süre
+  bool raceFullyOver = false; // Oyuncu 100m'yi tamamladığında true olur
+  String _currentRaceStatusMessage = "Yarış bilgileri yükleniyor...";
+  String _winner = "";
+
+  // Bot durumu
+  bool botFinishedRace = false; // Botun 100m'yi bitirip bitirmediği
+  double? botFinishTime;      // Botun 100m'yi bitirme süresi
+
+  // Oyuncu durumu
+  bool playerFinishedRace = false; // Oyuncunun 100m'yi bitirip bitirmediği
+  double? playerFinishTimeForStats; // Oyuncunun 100m'yi bitirme süresi (istatistik için)
+
+
+  // Sensör ve Timer'lar
   double previousZ = 0;
   bool firstRead = true;
-  bool raceOver = false;
-  Timer? botTimer;
-  Timer? raceTimer;
-  double raceTime = 0.0;
+  Timer? botMovementTimer; // Botun hareketini yöneten timer
+  Timer? mainRaceTimer;    // Ana yarış süresini sayan timer
   StreamSubscription<AccelerometerEvent>? sensorSubscription;
-  double botSpeed = 5.0; // Varsayılan bot hızı
 
+  // Diğer state'ler
+  double botSpeed = 5.0;
   int wins = 0;
   int losses = 0;
   int totalRaces = 0;
   double totalTime = 0.0;
   double bestTime = double.infinity;
-  String _currentRaceStatusMessage = "Yarış bilgileri yükleniyor...";
-  String _winner = "";
   bool _isLoadingDifficulty = false;
 
   @override
@@ -68,135 +69,243 @@ class _RaceScreenState extends State<RaceScreen> {
       _isLoadingDifficulty = true;
       _currentRaceStatusMessage = "Zorluk ayarları yükleniyor...";
     });
-
     await _initializeRaceParameters();
-
     if (mounted) {
       setState(() {
         _isLoadingDifficulty = false;
       });
-      if (!raceOver) {
-        startRace();
-      }
+      // _initializeRaceParameters bittikten sonra startRace çağrılacak
+      // ama sadece _isLoadingDifficulty false ise ve raceFullyOver değilse.
+      // Bu kontrol startRace içine de eklenebilir.
+      startRace(); // Yarışı başlat
     }
   }
 
   Future<void> _initializeRaceParameters() async {
-    print("--- _initializeRaceParameters BAŞLADI ---");
-    print("Seçilen Zorluk: ${widget.newSelectedDifficulty}");
+    // ... (Önceki _initializeRaceParameters kodu aynı kalacak, sadece printleri temizleyebiliriz) ...
+    // Örnek olarak dinamik zorluk kısmı:
     if (widget.newSelectedDifficulty == DifficultyLevel.dinamik) {
-      print("Dinamik Zorluk Maç Sayısı İsteği: ${widget.dynamicMatchCount}");
-    }
-
-    switch (widget.newSelectedDifficulty) {
-      case DifficultyLevel.kolay:
-        botSpeed = 3.3;
-        _currentRaceStatusMessage = "Kolay Seviyede Yarış Başlıyor!";
-        break;
-      case DifficultyLevel.orta:
-        botSpeed = 5.5;
-        _currentRaceStatusMessage = "Orta Seviyede Yarış Başlıyor!";
-        break;
-      case DifficultyLevel.zor:
-        botSpeed = 6.8;
-        _currentRaceStatusMessage = "Zor Seviyede Yarış Başlıyor!";
-        break;
-      case DifficultyLevel.dinamik:
-        _currentRaceStatusMessage = "Dinamik Zorluk Hesaplanıyor...";
-        if (mounted) setState(() {});
-
-        final user = FirebaseAuth.instance.currentUser;
-        if (user == null) {
-          print("Dinamik zorluk için kullanıcı girişi gerekli. Varsayılan Orta hız (5.5) ayarlandı.");
-          botSpeed = 5.5;
-          _currentRaceStatusMessage = "Giriş yapılmamış, Orta seviyede yarış başlıyor!";
-          break;
-        }
-
-        print("Kullanıcı UID: ${user.uid}");
-        if (widget.dynamicMatchCount != null && widget.dynamicMatchCount! > 0) {
-          try {
-            print("Firestore'dan son ${widget.dynamicMatchCount} maç çekiliyor...");
-            QuerySnapshot matchHistorySnapshot = await FirebaseFirestore.instance
-                .collection('userMatches')
-                .doc(user.uid)
-                .collection('matches')
-                .orderBy('timestamp', descending: true)
-                .limit(widget.dynamicMatchCount!)
-                .get();
-
-            print("Firestore'dan ${matchHistorySnapshot.docs.length} adet maç dokümanı çekildi.");
-
-            if (matchHistorySnapshot.docs.isNotEmpty) {
-              double totalRaceTime = 0;
-              int validMatchesCount = 0;
-              for (var i = 0; i < matchHistorySnapshot.docs.length; i++) {
-                final doc = matchHistorySnapshot.docs[i];
-                final data = doc.data() as Map<String, dynamic>?;
-                if (data != null && data.containsKey('raceTime') && data['raceTime'] is num) {
-                  double currentMatchTime = (data['raceTime'] as num).toDouble();
-                  print("Maç ${i+1} Süresi: $currentMatchTime s");
-                  totalRaceTime += currentMatchTime;
-                  validMatchesCount++;
-                } else {
-                  print("Maç ${i+1} geçersiz raceTime verisi içeriyor veya raceTime yok. Atlanıyor. Data: $data");
-                }
-              }
-              print("Toplam geçerli maç sayısı: $validMatchesCount, Toplam süre: $totalRaceTime s");
-
-              if (validMatchesCount > 0) {
-                double averageRaceTime = totalRaceTime / validMatchesCount;
-                print("Hesaplanan Ortalama Yarış Süresi: $averageRaceTime s");
-
-                if (averageRaceTime > 0) {
-                  double calculatedBotSpeed = 100 / averageRaceTime; // 100 metrelik yarış için
-                  print("Hesaplanan Ham Bot Hızı (100/ortalamaSüre): $calculatedBotSpeed m/s");
-
-                  // MAKSİMUM HIZ SINIRI KALDIRILDI, SADECE MİNİMUM SINIR KALDI
-                  botSpeed = calculatedBotSpeed.clamp(3.0, double.infinity); // Min 3.0 m/s, maksimum sınır yok
-                  // Eğer yine de bir üst sınır isterseniz, örneğin 15.0 m/s:
-                  // botSpeed = calculatedBotSpeed.clamp(3.0, 15.0);
-                  print("Sınırlandırılmış (Min 3.0) Bot Hızı: $botSpeed m/s");
-
-                  _currentRaceStatusMessage = "Dinamik Zorluk (Son $validMatchesCount Maç Ort.)! Bot Hızı: ${botSpeed.toStringAsFixed(1)} m/s";
-                } else {
-                  botSpeed = 5.0;
-                  _currentRaceStatusMessage = "Dinamik zorluk için geçersiz ortalama süre, Ortalama hız (5.0) ile yarış başlıyor!";
-                  print("Ortalama süre <= 0, varsayılan bot hızı (5.0) ayarlandı.");
-                }
-              } else {
-                botSpeed = 5.0;
-                _currentRaceStatusMessage = "Dinamik zorluk için geçerli maç verisi bulunamadı, Ortalama hız (5.0) ile yarış başlıyor!";
-                print("Geçerli maç sayısı 0, varsayılan bot hızı (5.0) ayarlandı.");
-              }
-            } else {
-              botSpeed = 5.5;
-              _currentRaceStatusMessage = "Hiç maç geçmişiniz yok, Orta seviyede yarış başlıyor!";
-              print("Hiç maç geçmişi bulunamadı, varsayılan bot hızı (5.5) ayarlandı.");
-              if (mounted) {
-                 WidgetsBinding.instance.addPostFrameCallback((_) {
-                    if(mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Dinamik zorluk için hiç maç geçmişiniz bulunamadı. Orta seviyede başlatılıyor.')),
-                      );
-                    }
-                  });
+      _currentRaceStatusMessage = "Dinamik Zorluk Hesaplanıyor...";
+      if (mounted) setState(() {});
+      final user = FirebaseAuth.instance.currentUser;
+      if (user != null && widget.dynamicMatchCount != null && widget.dynamicMatchCount! > 0) {
+        try {
+          QuerySnapshot history = await FirebaseFirestore.instance
+              .collection('userMatches').doc(user.uid).collection('matches')
+              .orderBy('timestamp', descending: true).limit(widget.dynamicMatchCount!).get();
+          if (history.docs.isNotEmpty) {
+            double totalTime = 0; int count = 0;
+            for (var doc in history.docs) {
+              final data = doc.data() as Map<String, dynamic>?;
+              if (data != null && data['raceTime'] is num) {
+                totalTime += (data['raceTime'] as num).toDouble();
+                count++;
               }
             }
-          } catch (e) {
-            print("Firestore'dan maç geçmişi okunurken HATA: $e");
-            botSpeed = 5.5;
-            _currentRaceStatusMessage = "Maç geçmişi okunurken hata oluştu, Orta seviyede yarış başlıyor!";
-          }
-        } else {
-          botSpeed = 5.5;
-          _currentRaceStatusMessage = "Dinamik zorluk için maç sayısı belirtilmemiş, Orta seviyede yarış başlıyor!";
-          print("Dinamik maç sayısı null veya <=0, varsayılan bot hızı (5.5) ayarlandı.");
-        }
-        break;
+            if (count > 0) {
+              double avgTime = totalTime / count;
+              if (avgTime > 0) botSpeed = (100 / avgTime).clamp(3.0, 15.0); // Max hız 15.0 m/s
+              else botSpeed = 5.0;
+              _currentRaceStatusMessage = "Dinamik Zorluk! Bot Hızı: ${botSpeed.toStringAsFixed(1)} m/s";
+            } else { /* Yeterli veri yoksa varsayılan */ botSpeed = 5.0; _currentRaceStatusMessage = "Veri yok, Ortalama hızla başla"; }
+          } else { /* Hiç geçmiş yoksa varsayılan */ botSpeed = 5.5; _currentRaceStatusMessage = "Geçmiş yok, Orta hızla başla"; }
+        } catch (e) { /* Hata olursa varsayılan */ botSpeed = 5.5; _currentRaceStatusMessage = "Hata, Orta hızla başla"; print("Dinamik zorluk hatası: $e");}
+      } else { /* Kullanıcı yoksa veya maç sayısı geçersizse */ botSpeed = 5.5; _currentRaceStatusMessage = "Orta hızla başla"; }
+    } else if (widget.newSelectedDifficulty == DifficultyLevel.kolay) {
+        botSpeed = 3.3; _currentRaceStatusMessage = "Kolay Seviyede Yarış Başlıyor!";
+    } else if (widget.newSelectedDifficulty == DifficultyLevel.orta) {
+        botSpeed = 5.5; _currentRaceStatusMessage = "Orta Seviyede Yarış Başlıyor!";
+    } else if (widget.newSelectedDifficulty == DifficultyLevel.zor) {
+        botSpeed = 6.8; _currentRaceStatusMessage = "Zor Seviyede Yarış Başlıyor!";
     }
-    print("--- _initializeRaceParameters BİTTİ --- Bot Hızı: $botSpeed, Mesaj: $_currentRaceStatusMessage");
+    // ... (Diğer zorluk seviyeleri için de mesajlar güncellenmeli)
+    if (mounted) setState(() {});
   }
+
+
+  void startRace() {
+    if (!mounted || _isLoadingDifficulty || raceFullyOver) return;
+    print("Yarış Başlatılıyor! Bot Hızı: $botSpeed");
+    setState(() {
+      playerDistance = 0;
+      botDistance = 0;
+      raceTime = 0.0;
+      raceFullyOver = false;
+      _winner = "";
+      botFinishedRace = false;
+      botFinishTime = null;
+      playerFinishedRace = false;
+      playerFinishTimeForStats = null;
+      firstRead = true;
+      // _currentRaceStatusMessage zaten _initializeRaceParameters'da ayarlandı.
+      // Yarış başladığında farklı bir mesaj göstermek isterseniz burada güncelleyebilirsiniz.
+    });
+
+    mainRaceTimer?.cancel();
+    sensorSubscription?.cancel();
+    botMovementTimer?.cancel();
+
+    mainRaceTimer = Timer.periodic(const Duration(milliseconds: 10), (_) {
+      if (!mounted || raceFullyOver) { // Oyuncu 100m'yi tamamladığında ana timer durur
+        mainRaceTimer?.cancel();
+        return;
+      }
+      setState(() {
+        raceTime += 0.01;
+      });
+    });
+
+    sensorSubscription = accelerometerEvents.listen((event) {
+      if (raceFullyOver || playerFinishedRace || !mounted) { // Oyuncu 100m'yi bitirdiyse daha fazla ilerlemez
+        // sensorSubscription?.cancel(); // Bu burada iptal edilirse, yarış bittikten sonra hala dinleyebilir.
+                                     // finishRace içinde iptal etmek daha doğru.
+        return;
+      }
+      // ... (sensörle playerDistance artırma mantığı aynı kalır) ...
+      double currentZ = event.z;
+      if (firstRead) {
+        previousZ = currentZ;
+        firstRead = false;
+        return;
+      }
+      double diff = (currentZ - previousZ).abs();
+      previousZ = currentZ;
+
+      if (diff > 0.5) {
+        setState(() {
+          if (!playerFinishedRace) { // Sadece oyuncu henüz bitirmemişse mesafeyi artır
+            playerDistance += diff * 0.08;
+            if (playerDistance >= 100) {
+              playerDistance = 100; // Tam 100'de sabitle
+              playerFinishedRace = true;
+              playerFinishTimeForStats = raceTime; // Oyuncunun 100m bitirme süresi
+              print("Oyuncu 100m'yi ${playerFinishTimeForStats?.toStringAsFixed(2)} saniyede bitirdi.");
+              _checkAndFinalizeRace();
+            }
+          }
+        });
+      }
+    });
+
+    botMovementTimer = Timer.periodic(const Duration(seconds: 1), (_) {
+      if (botFinishedRace || raceFullyOver || !mounted) { // Bot bitirdiyse veya yarış tamamen bittiyse bot durur
+        botMovementTimer?.cancel();
+        return;
+      }
+      setState(() {
+        botDistance += botSpeed;
+        if (botDistance >= 100) {
+          botDistance = 100; // Tam 100'de sabitle
+          if (!botFinishedRace) { // Sadece ilk bitirişinde set et
+            botFinishedRace = true;
+            botFinishTime = raceTime;
+            botMovementTimer?.cancel(); // Botun timer'ını durdur
+            print("Bot 100m'yi ${botFinishTime?.toStringAsFixed(2)} saniyede bitirdi.");
+            if (!playerFinishedRace) { // Eğer oyuncu hala yarışıyorsa mesaj göster
+                _currentRaceStatusMessage = "Bot yarışı bitirdi! Sen 100m'yi tamamla...";
+            }
+            _checkAndFinalizeRace();
+          }
+        }
+      });
+    });
+  }
+
+  void _checkAndFinalizeRace() {
+    if (playerFinishedRace && !raceFullyOver) { // Oyuncu 100m'yi bitirdiyse ve yarış sonucu henüz belirlenmediyse
+      if (botFinishedRace) { // Eğer bot da bitirmişse, süreleri karşılaştır
+        _winner = (playerFinishTimeForStats! <= botFinishTime!) ? "You" : "Bot";
+      } else { // Bot henüz bitirmemişse, kazanan oyuncu
+        _winner = "You";
+      }
+      _finalizeRace(_winner, playerFinishTimeForStats!);
+    }
+    // Eğer sadece bot bitirmişse ve oyuncu devam ediyorsa, _finalizeRace çağrılmaz.
+  }
+
+  void _finalizeRace(String winner, double finalPlayerRaceTime) async {
+    if (raceFullyOver || !mounted) return;
+
+    setState(() {
+      raceFullyOver = true; // Yarışın sonucu artık belli
+      _currentRaceStatusMessage = "$winner Kazandı!";
+    });
+
+    // Tüm timer ve abonelikleri durdur
+    mainRaceTimer?.cancel();
+    sensorSubscription?.cancel();
+    botMovementTimer?.cancel(); // Zaten bot bitirince durmuş olabilir ama garanti olsun
+
+    // İstatistikleri güncelle (oyuncunun 100m süresiyle)
+    setState(() {
+      totalRaces++;
+      totalTime += finalPlayerRaceTime; // Oyuncunun 100m süresini ekle
+      if (winner == "You") {
+        wins++;
+        if (finalPlayerRaceTime < bestTime) bestTime = finalPlayerRaceTime;
+      } else {
+        losses++;
+      }
+    });
+    await saveStats(); // Yerel istatistikleri kaydet
+    // Firestore'a oyuncunun 100m süresini kaydet
+    await _saveMatchResultToFirestore(winner, finalPlayerRaceTime);
+
+    if (mounted) {
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (_) => AlertDialog(
+          title: Text("$winner Kazandı!"),
+          content: Text("Senin Süren: ${finalPlayerRaceTime.toStringAsFixed(2)} saniye\n" +
+                        (botFinishedRace ? "Bot Süresi: ${botFinishTime?.toStringAsFixed(2)} saniye" : "Bot henüz bitirmedi")),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                if (mounted) {
+                  Navigator.of(context).pushReplacement(
+                    MaterialPageRoute(builder: (context) => const DifficultySelectionScreen()),
+                  );
+                }
+              },
+              child: const Text("Tekrar Oyna"),
+            ),
+          ],
+        ),
+      );
+    }
+  }
+
+  // _saveMatchResultToFirestore metodunu güncelleyerek ikinci bir parametre almasını sağla
+  Future<void> _saveMatchResultToFirestore(String winner, double playerActualRaceTime) async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+    try {
+      await FirebaseFirestore.instance
+          .collection('userMatches').doc(user.uid).collection('matches').add({
+        'timestamp': FieldValue.serverTimestamp(),
+        'raceTime': playerActualRaceTime, // Oyuncunun 100m'yi tamamlama süresi
+        'difficulty': widget.newSelectedDifficulty.name,
+        'dynamicMatchCount': widget.newSelectedDifficulty == DifficultyLevel.dinamik
+            ? widget.dynamicMatchCount : null,
+        'won': winner == "You",
+        'botFinishTime': botFinishTime, // Botun bitirme süresini de kaydet (opsiyonel)
+      });
+      print("Yarış sonucu Firestore'a başarıyla kaydedildi. Oyuncu Süresi: $playerActualRaceTime s");
+    } catch (e) {
+      print("Firestore'a yarış sonucu kaydedilirken hata oluştu: $e");
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Yarış sonucu kaydedilirken bir hata oluştu: ${e.toString()}')),
+        );
+      }
+    }
+  }
+
+  // loadStats, saveStats (yerel), dispose ve build metodları büyük ölçüde aynı kalabilir.
+  // Sadece build metodundaki _currentRaceStatusMessage'ın gösterimi ve
+  // yarışın bitip bitmediğine dair UI güncellemeleri bu yeni mantığa göre ayarlanabilir.
 
   Future<void> loadStats() async {
     final prefs = await SharedPreferences.getInstance();
@@ -222,160 +331,10 @@ class _RaceScreenState extends State<RaceScreen> {
     }
   }
 
-  Future<void> _saveMatchResultToFirestore(String winner) async {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user == null) {
-      print("Kullanıcı girişi yapılmamış, Firestore'a kayıt yapılamadı.");
-      return;
-    }
-    try {
-      await FirebaseFirestore.instance
-          .collection('userMatches')
-          .doc(user.uid)
-          .collection('matches')
-          .add({
-        'timestamp': FieldValue.serverTimestamp(),
-        'raceTime': raceTime,
-        'difficulty': widget.newSelectedDifficulty.name,
-        'dynamicMatchCount': widget.newSelectedDifficulty == DifficultyLevel.dinamik
-            ? widget.dynamicMatchCount
-            : null,
-        'won': winner == "You",
-      });
-      print("Yarış sonucu Firestore'a başarıyla kaydedildi. Süre: $raceTime s");
-    } catch (e) {
-      print("Firestore'a yarış sonucu kaydedilirken hata oluştu: $e");
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Yarış sonucu kaydedilirken bir hata oluştu: ${e.toString()}')),
-        );
-      }
-    }
-  }
-
-  void startRace() {
-    if (!mounted || _isLoadingDifficulty) return;
-    setState(() {
-      raceOver = false;
-      botDistance = 0;
-      playerDistance = 0;
-      firstRead = true;
-      raceTime = 0.0;
-      _winner = "";
-    });
-
-    raceTimer?.cancel();
-    sensorSubscription?.cancel();
-    botTimer?.cancel();
-
-    raceTimer = Timer.periodic(const Duration(milliseconds: 10), (_) {
-      if (!mounted || raceOver) {
-        raceTimer?.cancel();
-        return;
-      }
-      setState(() {
-        raceTime += 0.01;
-      });
-    });
-
-    sensorSubscription = accelerometerEvents.listen((event) {
-      if (raceOver || !mounted) {
-        sensorSubscription?.cancel();
-        return;
-      }
-      double currentZ = event.z;
-      if (firstRead) {
-        previousZ = currentZ;
-        firstRead = false;
-        return;
-      }
-      double diff = (currentZ - previousZ).abs();
-      previousZ = currentZ;
-
-      if (diff > 0.5) {
-        setState(() {
-          playerDistance += diff * 0.08;
-          if (playerDistance >= 100 && !raceOver) {
-            _winner = "You";
-            finishRace(_winner);
-          }
-        });
-      }
-    });
-
-    botTimer = Timer.periodic(const Duration(seconds: 1), (_) {
-      if (raceOver || !mounted) {
-        botTimer?.cancel();
-        return;
-      }
-      setState(() {
-        botDistance += botSpeed;
-        if (botDistance >= 100 && !raceOver) {
-          _winner = "Bot";
-          finishRace(_winner);
-        }
-      });
-    });
-  }
-
-  void finishRace(String winner) async {
-    if (raceOver) return;
-
-    if (mounted) {
-      setState(() {
-        raceOver = true;
-        _currentRaceStatusMessage = "$winner Kazandı!";
-      });
-    }
-
-    botTimer?.cancel();
-    sensorSubscription?.cancel();
-    raceTimer?.cancel();
-
-    if (mounted) {
-      setState(() {
-        totalRaces++;
-        totalTime += raceTime;
-        if (winner == "You") {
-          wins++;
-          if (raceTime < bestTime) bestTime = raceTime;
-        } else {
-          losses++;
-        }
-      });
-    }
-    await saveStats();
-    await _saveMatchResultToFirestore(winner);
-
-    if (mounted) {
-      showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (_) => AlertDialog(
-          title: Text("$winner Kazandı!"),
-          content: Text("Süre: ${raceTime.toStringAsFixed(2)} saniye"),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-                if (mounted) {
-                  Navigator.of(context).pushReplacement(
-                    MaterialPageRoute(builder: (context) => const DifficultySelectionScreen()),
-                  );
-                }
-              },
-              child: const Text("Tekrar Oyna"),
-            ),
-          ],
-        ),
-      );
-    }
-  }
-
   @override
   void dispose() {
-    botTimer?.cancel();
-    raceTimer?.cancel();
+    botMovementTimer?.cancel();
+    mainRaceTimer?.cancel();
     sensorSubscription?.cancel();
     super.dispose();
   }
@@ -390,7 +349,7 @@ class _RaceScreenState extends State<RaceScreen> {
       return Scaffold(
         appBar: AppBar(
           title: Text(widget.newSelectedDifficulty == DifficultyLevel.dinamik
-              ? 'DİNAMİK ZORLUK' // Veya yerelleştirilmiş
+              ? 'DİNAMİK ZORLUK'
               : '${widget.newSelectedDifficulty.name.toUpperCase()} SEVİYE YARIŞ'),
           backgroundColor: colorScheme.primaryContainer,
         ),
@@ -411,11 +370,11 @@ class _RaceScreenState extends State<RaceScreen> {
       appBar: AppBar(
         title: Text('${widget.newSelectedDifficulty.name.toUpperCase()} Seviye Yarış'),
         backgroundColor: colorScheme.primaryContainer,
-        actions: [
-          IconButton(
+        actions: [ /* ... AppBar actions aynı kalabilir ... */
+           IconButton(
             icon: const Icon(Icons.bar_chart),
             tooltip: 'İstatistiklerim',
-            onPressed: () {
+            onPressed: () { /* ... İstatistik dialog kodu aynı kalabilir ... */
               if (mounted) {
                  showDialog(
                     context: context,
@@ -468,13 +427,17 @@ class _RaceScreenState extends State<RaceScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Text(_currentRaceStatusMessage, style: textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold), textAlign: TextAlign.center),
+              Text(
+                raceFullyOver ? "$_winner Kazandı!" : _currentRaceStatusMessage, // Duruma göre mesaj
+                style: textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+                textAlign: TextAlign.center
+              ),
               const SizedBox(height: 8),
               if (user?.email != null)
                 Text("Yarışçı: ${user!.email}", style: textTheme.bodySmall, textAlign: TextAlign.center),
               const SizedBox(height: 20),
 
-              Card(
+              Card( /* ... Card içeriği aynı kalabilir ... */
                 elevation: 3,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 child: Padding(
@@ -533,21 +496,21 @@ class _RaceScreenState extends State<RaceScreen> {
               ),
               const SizedBox(height: 30),
 
-              if (raceOver)
+              if (raceFullyOver)
                 Padding(
                   padding: const EdgeInsets.only(top: 16.0),
-                  child: Text("🏁 YARIŞ BİTTİ! 🏁", style: textTheme.headlineSmall?.copyWith(color: Colors.orangeAccent, fontWeight: FontWeight.bold), textAlign: TextAlign.center),
+                  child: Text("🏁 YARIŞ SONUÇLANDI! 🏁", style: textTheme.headlineSmall?.copyWith(color: Colors.orangeAccent, fontWeight: FontWeight.bold), textAlign: TextAlign.center),
                 )
-              else if (!raceOver && raceTime > 0.01)
+              else if (!playerFinishedRace) // Oyuncu henüz bitirmemişse
                  Column(
                    children: [
                      Icon(Icons.directions_run, size: 50, color: colorScheme.secondary),
                      const SizedBox(height: 10),
-                     Text("Kürek Çekmeye Devam!", style: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w600)),
+                     Text(botFinishedRace ? "Bot bitirdi, devam et!" : "Kürek Çekmeye Devam!", style: textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w600)),
                    ],
                  )
-              else if (!raceOver && raceTime < 0.01 && !_isLoadingDifficulty)
-                 const Center(child: Text("Yarış Başlamak Üzere...")),
+              else if (playerFinishedRace && !raceFullyOver) // Oyuncu bitirdi ama bot hala yarışıyor olabilir (veya sonuç bekleniyor)
+                  const Center(child: Text("Yarış Bitti, Sonuçlar Hesaplanıyor...")),
             ],
           ),
         ),
