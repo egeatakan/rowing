@@ -155,4 +155,120 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get numericValidationError => 'Please enter a valid number.';
+
+  @override
+  String get loadingRaceInfo => 'Loading race info...';
+
+  @override
+  String get loadingDifficultySettings => 'Loading difficulty settings...';
+
+  @override
+  String get easyLevelRaceStarting => 'Easy Level Race Starting!';
+
+  @override
+  String get mediumLevelRaceStarting => 'Medium Level Race Starting!';
+
+  @override
+  String get hardLevelRaceStarting => 'Hard Level Race Starting!';
+
+  @override
+  String get dynamicDifficultyCalculating => 'Calculating Dynamic Difficulty...';
+
+  @override
+  String dynamicDifficultyStartMessage(int matchCount, String botSpeed) {
+    return 'Dynamic Difficulty (Avg. Last $matchCount Matches)! Bot Speed: $botSpeed m/s';
+  }
+
+  @override
+  String get dynamicNoDataStartMedium => 'Not enough match data for dynamic difficulty, starting with Medium speed!';
+
+  @override
+  String get dynamicNoHistoryStartMedium => 'No match history, starting with Medium speed!';
+
+  @override
+  String get dynamicErrorStartMedium => 'Error reading match history, starting with Medium speed!';
+
+  @override
+  String get dynamicLoginNeeded => 'Not logged in, starting with Medium speed!';
+
+  @override
+  String get dynamicNoMatchCount => 'Match count not specified for dynamic difficulty, starting with Medium speed!';
+
+  @override
+  String raceAppBarTitle(String difficultyLevel) {
+    return '$difficultyLevel Level Race';
+  }
+
+  @override
+  String get dynamicDifficultyAppBarTitle => 'DYNAMIC DIFFICULTY RACE';
+
+  @override
+  String get statisticsTooltip => 'My Statistics';
+
+  @override
+  String get userLabel => 'User:';
+
+  @override
+  String get unknownUser => 'Unknown';
+
+  @override
+  String get closeButton => 'Close';
+
+  @override
+  String get racerLabel => 'Racer:';
+
+  @override
+  String get timeLabel => 'TIME:';
+
+  @override
+  String get youLabel => 'YOU';
+
+  @override
+  String get botLabel => 'BOT';
+
+  @override
+  String get raceFinishedMessage => '🏁 RACE FINISHED! 🏁';
+
+  @override
+  String get keepRowingMessage => 'Keep Rowing!';
+
+  @override
+  String get botFinishedContinueMessage => 'Bot finished, keep going!';
+
+  @override
+  String get raceStartingSoonMessage => 'Race Starting Soon...';
+
+  @override
+  String get calculatingResultsMessage => 'Race Over, Calculating Results...';
+
+  @override
+  String winnerMessage(String winner) {
+    return '$winner Wins!';
+  }
+
+  @override
+  String yourTimeMessage(String time) {
+    return 'Your Time: $time seconds';
+  }
+
+  @override
+  String botTimeMessage(String time) {
+    return 'Bot Time: $time seconds';
+  }
+
+  @override
+  String get botNotFinishedMessage => 'Bot hasn\'t finished yet';
+
+  @override
+  String get playAgainButton => 'Play Again';
+
+  @override
+  String errorSavingRaceResult(String error) {
+    return 'Error saving race result: $error';
+  }
+
+  @override
+  String errorLoggingOut(String error) {
+    return 'Logout error: $error';
+  }
 }

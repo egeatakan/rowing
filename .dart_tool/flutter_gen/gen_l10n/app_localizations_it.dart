@@ -155,4 +155,120 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get numericValidationError => 'Per favore inserisci un numero valido.';
+
+  @override
+  String get loadingRaceInfo => 'Caricamento informazioni gara...';
+
+  @override
+  String get loadingDifficultySettings => 'Caricamento impostazioni difficoltà...';
+
+  @override
+  String get easyLevelRaceStarting => 'Inizio Gara Livello Facile!';
+
+  @override
+  String get mediumLevelRaceStarting => 'Inizio Gara Livello Medio!';
+
+  @override
+  String get hardLevelRaceStarting => 'Inizio Gara Livello Difficile!';
+
+  @override
+  String get dynamicDifficultyCalculating => 'Calcolo Difficoltà Dinamica...';
+
+  @override
+  String dynamicDifficultyStartMessage(int matchCount, String botSpeed) {
+    return 'Difficoltà Dinamica (Media Ultime $matchCount Partite)! Velocità Bot: $botSpeed m/s';
+  }
+
+  @override
+  String get dynamicNoDataStartMedium => 'Dati partita insufficienti per difficoltà dinamica, inizio con velocità Media!';
+
+  @override
+  String get dynamicNoHistoryStartMedium => 'Nessuna cronologia partite, inizio con velocità Media!';
+
+  @override
+  String get dynamicErrorStartMedium => 'Errore lettura cronologia partite, inizio con velocità Media!';
+
+  @override
+  String get dynamicLoginNeeded => 'Accesso non effettuato, inizio con velocità Media!';
+
+  @override
+  String get dynamicNoMatchCount => 'Numero partite non specificato per difficoltà dinamica, inizio con velocità Media!';
+
+  @override
+  String raceAppBarTitle(String difficultyLevel) {
+    return 'Gara Livello $difficultyLevel';
+  }
+
+  @override
+  String get dynamicDifficultyAppBarTitle => 'GARA DIFFICOLTÀ DINAMICA';
+
+  @override
+  String get statisticsTooltip => 'Le Mie Statistiche';
+
+  @override
+  String get userLabel => 'Utente:';
+
+  @override
+  String get unknownUser => 'Sconosciuto';
+
+  @override
+  String get closeButton => 'Chiudi';
+
+  @override
+  String get racerLabel => 'Corridore:';
+
+  @override
+  String get timeLabel => 'TEMPO:';
+
+  @override
+  String get youLabel => 'TU';
+
+  @override
+  String get botLabel => 'BOT';
+
+  @override
+  String get raceFinishedMessage => '🏁 GARA TERMINATA! 🏁';
+
+  @override
+  String get keepRowingMessage => 'Continua a Remare!';
+
+  @override
+  String get botFinishedContinueMessage => 'Il Bot ha finito, continua!';
+
+  @override
+  String get raceStartingSoonMessage => 'La Gara Sta per Iniziare...';
+
+  @override
+  String get calculatingResultsMessage => 'Gara Finita, Calcolo Risultati...';
+
+  @override
+  String winnerMessage(String winner) {
+    return '$winner Vince!';
+  }
+
+  @override
+  String yourTimeMessage(String time) {
+    return 'Il Tuo Tempo: $time secondi';
+  }
+
+  @override
+  String botTimeMessage(String time) {
+    return 'Tempo Bot: $time secondi';
+  }
+
+  @override
+  String get botNotFinishedMessage => 'Il Bot non ha ancora finito';
+
+  @override
+  String get playAgainButton => 'Gioca Ancora';
+
+  @override
+  String errorSavingRaceResult(String error) {
+    return 'Errore nel salvataggio del risultato della gara: $error';
+  }
+
+  @override
+  String errorLoggingOut(String error) {
+    return 'Errore di logout: $error';
+  }
 }

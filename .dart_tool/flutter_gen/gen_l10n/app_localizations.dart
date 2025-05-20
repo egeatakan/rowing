@@ -384,6 +384,210 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Please enter a valid number.'**
   String get numericValidationError;
+
+  /// No description provided for @loadingRaceInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading race info...'**
+  String get loadingRaceInfo;
+
+  /// No description provided for @loadingDifficultySettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading difficulty settings...'**
+  String get loadingDifficultySettings;
+
+  /// No description provided for @easyLevelRaceStarting.
+  ///
+  /// In en, this message translates to:
+  /// **'Easy Level Race Starting!'**
+  String get easyLevelRaceStarting;
+
+  /// No description provided for @mediumLevelRaceStarting.
+  ///
+  /// In en, this message translates to:
+  /// **'Medium Level Race Starting!'**
+  String get mediumLevelRaceStarting;
+
+  /// No description provided for @hardLevelRaceStarting.
+  ///
+  /// In en, this message translates to:
+  /// **'Hard Level Race Starting!'**
+  String get hardLevelRaceStarting;
+
+  /// No description provided for @dynamicDifficultyCalculating.
+  ///
+  /// In en, this message translates to:
+  /// **'Calculating Dynamic Difficulty...'**
+  String get dynamicDifficultyCalculating;
+
+  /// No description provided for @dynamicDifficultyStartMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Dynamic Difficulty (Avg. Last {matchCount} Matches)! Bot Speed: {botSpeed} m/s'**
+  String dynamicDifficultyStartMessage(int matchCount, String botSpeed);
+
+  /// No description provided for @dynamicNoDataStartMedium.
+  ///
+  /// In en, this message translates to:
+  /// **'Not enough match data for dynamic difficulty, starting with Medium speed!'**
+  String get dynamicNoDataStartMedium;
+
+  /// No description provided for @dynamicNoHistoryStartMedium.
+  ///
+  /// In en, this message translates to:
+  /// **'No match history, starting with Medium speed!'**
+  String get dynamicNoHistoryStartMedium;
+
+  /// No description provided for @dynamicErrorStartMedium.
+  ///
+  /// In en, this message translates to:
+  /// **'Error reading match history, starting with Medium speed!'**
+  String get dynamicErrorStartMedium;
+
+  /// No description provided for @dynamicLoginNeeded.
+  ///
+  /// In en, this message translates to:
+  /// **'Not logged in, starting with Medium speed!'**
+  String get dynamicLoginNeeded;
+
+  /// No description provided for @dynamicNoMatchCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Match count not specified for dynamic difficulty, starting with Medium speed!'**
+  String get dynamicNoMatchCount;
+
+  /// No description provided for @raceAppBarTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{difficultyLevel} Level Race'**
+  String raceAppBarTitle(String difficultyLevel);
+
+  /// No description provided for @dynamicDifficultyAppBarTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'DYNAMIC DIFFICULTY RACE'**
+  String get dynamicDifficultyAppBarTitle;
+
+  /// No description provided for @statisticsTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'My Statistics'**
+  String get statisticsTooltip;
+
+  /// No description provided for @userLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'User:'**
+  String get userLabel;
+
+  /// No description provided for @unknownUser.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown'**
+  String get unknownUser;
+
+  /// No description provided for @closeButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get closeButton;
+
+  /// No description provided for @racerLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Racer:'**
+  String get racerLabel;
+
+  /// No description provided for @timeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'TIME:'**
+  String get timeLabel;
+
+  /// No description provided for @youLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'YOU'**
+  String get youLabel;
+
+  /// No description provided for @botLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'BOT'**
+  String get botLabel;
+
+  /// No description provided for @raceFinishedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'🏁 RACE FINISHED! 🏁'**
+  String get raceFinishedMessage;
+
+  /// No description provided for @keepRowingMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep Rowing!'**
+  String get keepRowingMessage;
+
+  /// No description provided for @botFinishedContinueMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Bot finished, keep going!'**
+  String get botFinishedContinueMessage;
+
+  /// No description provided for @raceStartingSoonMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Race Starting Soon...'**
+  String get raceStartingSoonMessage;
+
+  /// No description provided for @calculatingResultsMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Race Over, Calculating Results...'**
+  String get calculatingResultsMessage;
+
+  /// No description provided for @winnerMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'{winner} Wins!'**
+  String winnerMessage(String winner);
+
+  /// No description provided for @yourTimeMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Your Time: {time} seconds'**
+  String yourTimeMessage(String time);
+
+  /// No description provided for @botTimeMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Bot Time: {time} seconds'**
+  String botTimeMessage(String time);
+
+  /// No description provided for @botNotFinishedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Bot hasn\'t finished yet'**
+  String get botNotFinishedMessage;
+
+  /// No description provided for @playAgainButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Play Again'**
+  String get playAgainButton;
+
+  /// No description provided for @errorSavingRaceResult.
+  ///
+  /// In en, this message translates to:
+  /// **'Error saving race result: {error}'**
+  String errorSavingRaceResult(String error);
+
+  /// No description provided for @errorLoggingOut.
+  ///
+  /// In en, this message translates to:
+  /// **'Logout error: {error}'**
+  String errorLoggingOut(String error);
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

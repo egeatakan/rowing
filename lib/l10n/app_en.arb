@@ -27,7 +27,6 @@
   "name": "Your Name",
   "featureComingSoon": "This feature will be added soon.",
   "logoutTooltip": "Logout",
-
   "difficultyLevelTitle": "Select Difficulty Level",
   "easy": "Easy",
   "medium": "Medium",
@@ -39,7 +38,6 @@
   "dynamicDifficultyValidationError": "Please enter a valid positive number of matches for dynamic difficulty.",
   "raceSettingsTitle": "Race Settings",
   "prepareForRaceTitle": "Prepare for Race",
-
   "yourStatisticsTitle": "Your Statistics",
   "wins": "Wins",
   "losses": "Losses",
@@ -61,12 +59,82 @@
     }
   },
   "nameValidationError": "Please enter your name.",
-
   "age": "Age",
   "height": "Height (cm)",
   "weight": "Weight (kg)",
   "pleaseEnterAge": "Please enter your age.",
   "pleaseEnterHeight": "Please enter your height in cm.",
   "pleaseEnterWeight": "Please enter your weight in kg.",
-  "numericValidationError": "Please enter a valid number."
+  "numericValidationError": "Please enter a valid number.",
+
+  "loadingRaceInfo": "Loading race info...",
+  "loadingDifficultySettings": "Loading difficulty settings...",
+  "easyLevelRaceStarting": "Easy Level Race Starting!",
+  "mediumLevelRaceStarting": "Medium Level Race Starting!",
+  "hardLevelRaceStarting": "Hard Level Race Starting!",
+  "dynamicDifficultyCalculating": "Calculating Dynamic Difficulty...",
+  "dynamicDifficultyStartMessage": "Dynamic Difficulty (Avg. Last {matchCount} Matches)! Bot Speed: {botSpeed} m/s",
+  "@dynamicDifficultyStartMessage": {
+    "placeholders": {
+      "matchCount": {"type": "int"},
+      "botSpeed": {"type": "String"}
+    }
+  },
+  "dynamicNoDataStartMedium": "Not enough match data for dynamic difficulty, starting with Medium speed!",
+  "dynamicNoHistoryStartMedium": "No match history, starting with Medium speed!",
+  "dynamicErrorStartMedium": "Error reading match history, starting with Medium speed!",
+  "dynamicLoginNeeded": "Not logged in, starting with Medium speed!",
+  "dynamicNoMatchCount": "Match count not specified for dynamic difficulty, starting with Medium speed!",
+  "raceAppBarTitle": "{difficultyLevel} Level Race",
+  "@raceAppBarTitle": {
+    "placeholders": {
+      "difficultyLevel": {"type": "String"}
+    }
+  },
+  "dynamicDifficultyAppBarTitle": "DYNAMIC DIFFICULTY RACE",
+  "statisticsTooltip": "My Statistics",
+  "userLabel": "User:",
+  "unknownUser": "Unknown",
+  "closeButton": "Close",
+  "racerLabel": "Racer:",
+  "timeLabel": "TIME:",
+  "youLabel": "YOU",
+  "botLabel": "BOT",
+  "raceFinishedMessage": "🏁 RACE FINISHED! 🏁",
+  "keepRowingMessage": "Keep Rowing!",
+  "botFinishedContinueMessage": "Bot finished, keep going!",
+  "raceStartingSoonMessage": "Race Starting Soon...",
+  "calculatingResultsMessage": "Race Over, Calculating Results...",
+  "winnerMessage": "{winner} Wins!",
+  "@winnerMessage": {
+    "placeholders": {
+      "winner": {"type": "String"}
+    }
+  },
+  "yourTimeMessage": "Your Time: {time} seconds",
+  "@yourTimeMessage": {
+    "placeholders": {
+      "time": {"type": "String"}
+    }
+  },
+  "botTimeMessage": "Bot Time: {time} seconds",
+  "@botTimeMessage": {
+    "placeholders": {
+      "time": {"type": "String"}
+    }
+  },
+  "botNotFinishedMessage": "Bot hasn't finished yet",
+  "playAgainButton": "Play Again",
+  "errorSavingRaceResult": "Error saving race result: {error}",
+  "@errorSavingRaceResult": {
+    "placeholders": {
+      "error": {"type": "String"}
+    }
+  },
+  "errorLoggingOut": "Logout error: {error}",
+  "@errorLoggingOut": {
+    "placeholders": {
+      "error": {"type": "String"}
+    }
+  }
 }
