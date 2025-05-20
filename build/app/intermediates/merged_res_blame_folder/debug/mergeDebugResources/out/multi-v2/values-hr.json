@@ -4,20 +4,20 @@
             "outputFile": "com.example.kurek_yarisi.app-mergeDebugResources-52:/values-hr/values-hr.xml",
             "map": [
                 {
-                    "source": "C:\\Users\\egeat\\.gradle\\caches\\8.10.2\\transforms\\c23851b223844b171c744d3d93135616\\transformed\\browser-1.4.0\\res\\values-hr\\values-hr.xml",
+                    "source": "C:\\Users\\egeat\\.gradle\\caches\\8.10.2\\transforms\\998bdbcf6793061348520918aa8a23fb\\transformed\\jetified-play-services-base-18.1.0\\res\\values-hr\\values.xml",
                     "from": {
-                        "startLines": "2,3,4,5",
-                        "startColumns": "4,4,4,4",
-                        "startOffsets": "55,160,260,374",
-                        "endColumns": "104,99,113,101",
-                        "endOffsets": "155,255,369,471"
+                        "startLines": "4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20",
+                        "startColumns": "0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0",
+                        "startOffsets": "193,295,448,574,680,833,959,1070,1173,1319,1422,1575,1699,1842,1981,2045,2103",
+                        "endColumns": "101,152,125,105,152,125,110,102,145,102,152,123,142,138,63,57,76",
+                        "endOffsets": "294,447,573,679,832,958,1069,1172,1318,1421,1574,1698,1841,1980,2044,2102,2179"
                     },
                     "to": {
-                        "startLines": "64,68,69,70",
-                        "startColumns": "4,4,4,4",
-                        "startOffsets": "6460,6816,6916,7030",
-                        "endColumns": "104,99,113,101",
-                        "endOffsets": "6560,6911,7025,7127"
+                        "startLines": "45,46,47,48,49,50,51,52,54,55,56,57,58,59,60,61,62",
+                        "startColumns": "4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4",
+                        "startOffsets": "4202,4308,4465,4595,4705,4862,4992,5107,5346,5496,5603,5760,5888,6035,6178,6246,6308",
+                        "endColumns": "105,156,129,109,156,129,114,106,149,106,156,127,146,142,67,61,80",
+                        "endOffsets": "4303,4460,4590,4700,4857,4987,5102,5209,5491,5598,5755,5883,6030,6173,6241,6303,6384"
                     }
                 },
                 {
@@ -74,23 +74,6 @@
                     }
                 },
                 {
-                    "source": "C:\\Users\\egeat\\.gradle\\caches\\8.10.2\\transforms\\0b156316ad8713e3140d88a3d6955375\\transformed\\jetified-play-services-base-18.0.1\\res\\values-hr\\values.xml",
-                    "from": {
-                        "startLines": "4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20",
-                        "startColumns": "0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0",
-                        "startOffsets": "193,295,448,574,680,833,959,1070,1173,1319,1422,1575,1699,1842,1981,2045,2103",
-                        "endColumns": "101,152,125,105,152,125,110,102,145,102,152,123,142,138,63,57,76",
-                        "endOffsets": "294,447,573,679,832,958,1069,1172,1318,1421,1574,1698,1841,1980,2044,2102,2179"
-                    },
-                    "to": {
-                        "startLines": "45,46,47,48,49,50,51,52,54,55,56,57,58,59,60,61,62",
-                        "startColumns": "4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4",
-                        "startOffsets": "4202,4308,4465,4595,4705,4862,4992,5107,5346,5496,5603,5760,5888,6035,6178,6246,6308",
-                        "endColumns": "105,156,129,109,156,129,114,106,149,106,156,127,146,142,67,61,80",
-                        "endOffsets": "4303,4460,4590,4700,4857,4987,5102,5209,5491,5598,5755,5883,6030,6173,6241,6303,6384"
-                    }
-                },
-                {
                     "source": "C:\\Users\\egeat\\.gradle\\caches\\8.10.2\\transforms\\3d2179540d5a028ca068473e4a83853c\\transformed\\jetified-play-services-basement-18.3.0\\res\\values-hr\\values.xml",
                     "from": {
                         "startLines": "4",
@@ -122,6 +105,23 @@
                         "startOffsets": "6389,6633,11079,11242,11576,11745,11832",
                         "endColumns": "70,86,82,147,168,86,82",
                         "endOffsets": "6455,6715,11157,11385,11740,11827,11910"
+                    }
+                },
+                {
+                    "source": "C:\\Users\\egeat\\.gradle\\caches\\8.10.2\\transforms\\d047a8843de87885300cce14fc4620e9\\transformed\\browser-1.5.0\\res\\values-hr\\values-hr.xml",
+                    "from": {
+                        "startLines": "2,3,4,5",
+                        "startColumns": "4,4,4,4",
+                        "startOffsets": "55,160,260,374",
+                        "endColumns": "104,99,113,101",
+                        "endOffsets": "155,255,369,471"
+                    },
+                    "to": {
+                        "startLines": "64,68,69,70",
+                        "startColumns": "4,4,4,4",
+                        "startOffsets": "6460,6816,6916,7030",
+                        "endColumns": "104,99,113,101",
+                        "endOffsets": "6560,6911,7025,7127"
                     }
                 }
             ]

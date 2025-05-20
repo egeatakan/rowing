@@ -14,10 +14,17 @@ dependencies:
   firebase_core: ^2.31.0
   firebase_auth: ^4.19.0
   cloud_firestore: ^4.17.3 # Sizin sürümünüz ^5.6.7 idi, onu kullanmaya devam edin.
+  assets:
+    - assets/google_logo.png
+    - assets/apple_logo.png # Apple için de isterseniz
+
   
   flutter_localizations:
     sdk: flutter
   intl: ^0.19.0 
+
+  google_sign_in: ^6.2.1    # En son sürümü pub.dev'den kontrol edin
+  sign_in_with_apple: ^6.1.1 # En son sürümü pub.dev'den kontrol edin
 
   cupertino_icons: ^1.0.8
   clerk_flutter: ^0.0.9-beta # Eğer Firebase Auth ana çözümünüzse bunu kaldırabilirsiniz.

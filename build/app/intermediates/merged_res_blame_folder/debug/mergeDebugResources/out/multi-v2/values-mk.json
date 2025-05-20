@@ -55,7 +55,24 @@
                     }
                 },
                 {
-                    "source": "C:\\Users\\egeat\\.gradle\\caches\\8.10.2\\transforms\\0b156316ad8713e3140d88a3d6955375\\transformed\\jetified-play-services-base-18.0.1\\res\\values-mk\\values.xml",
+                    "source": "C:\\Users\\egeat\\.gradle\\caches\\8.10.2\\transforms\\3d2179540d5a028ca068473e4a83853c\\transformed\\jetified-play-services-basement-18.3.0\\res\\values-mk\\values.xml",
+                    "from": {
+                        "startLines": "4",
+                        "startColumns": "0",
+                        "startOffsets": "195",
+                        "endColumns": "132",
+                        "endOffsets": "327"
+                    },
+                    "to": {
+                        "startLines": "52",
+                        "startColumns": "4",
+                        "startOffsets": "5163",
+                        "endColumns": "136",
+                        "endOffsets": "5295"
+                    }
+                },
+                {
+                    "source": "C:\\Users\\egeat\\.gradle\\caches\\8.10.2\\transforms\\998bdbcf6793061348520918aa8a23fb\\transformed\\jetified-play-services-base-18.1.0\\res\\values-mk\\values.xml",
                     "from": {
                         "startLines": "4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20",
                         "startColumns": "0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0",
@@ -72,20 +89,20 @@
                     }
                 },
                 {
-                    "source": "C:\\Users\\egeat\\.gradle\\caches\\8.10.2\\transforms\\3d2179540d5a028ca068473e4a83853c\\transformed\\jetified-play-services-basement-18.3.0\\res\\values-mk\\values.xml",
+                    "source": "C:\\Users\\egeat\\.gradle\\caches\\8.10.2\\transforms\\d047a8843de87885300cce14fc4620e9\\transformed\\browser-1.5.0\\res\\values-mk\\values-mk.xml",
                     "from": {
-                        "startLines": "4",
-                        "startColumns": "0",
-                        "startOffsets": "195",
-                        "endColumns": "132",
-                        "endOffsets": "327"
+                        "startLines": "2,3,4,5",
+                        "startColumns": "4,4,4,4",
+                        "startOffsets": "55,168,273,388",
+                        "endColumns": "112,104,114,100",
+                        "endOffsets": "163,268,383,484"
                     },
                     "to": {
-                        "startLines": "52",
-                        "startColumns": "4",
-                        "startOffsets": "5163",
-                        "endColumns": "136",
-                        "endOffsets": "5295"
+                        "startLines": "63,67,68,69",
+                        "startColumns": "4,4,4,4",
+                        "startOffsets": "6458,6815,6920,7035",
+                        "endColumns": "112,104,114,100",
+                        "endOffsets": "6566,6915,7030,7131"
                     }
                 },
                 {
@@ -105,23 +122,6 @@
                         "endLines": "5,33,41,42,43,64,66,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,99,100,101,102,103,104,105,106,107,108,109,110,111,112,113,114,115,116,117,118,119,121",
                         "endColumns": "12,81,95,123,86,65,90,69,63,102,64,59,67,62,54,127,56,61,54,74,139,86,82,132,81,84,86,53,54,65,72,75,88,72,75,74,69,87,74,91,91,73,73,91,52,66,82,86,61,63,62,113,106,101,110,57,58,84",
                         "endOffsets": "316,3113,3928,4052,4139,6632,6810,7201,7265,7368,7433,7493,7561,7624,7679,7807,7864,7926,7981,8056,8196,8283,8366,8499,8581,8666,8753,8807,8862,8928,9001,9077,9166,9239,9315,9390,9460,9548,9623,9715,9807,9881,9955,10047,10100,10167,10250,10337,10399,10463,10526,10640,10747,10849,10960,11018,11077,11243"
-                    }
-                },
-                {
-                    "source": "C:\\Users\\egeat\\.gradle\\caches\\8.10.2\\transforms\\c23851b223844b171c744d3d93135616\\transformed\\browser-1.4.0\\res\\values-mk\\values-mk.xml",
-                    "from": {
-                        "startLines": "2,3,4,5",
-                        "startColumns": "4,4,4,4",
-                        "startOffsets": "55,168,273,388",
-                        "endColumns": "112,104,114,100",
-                        "endOffsets": "163,268,383,484"
-                    },
-                    "to": {
-                        "startLines": "63,67,68,69",
-                        "startColumns": "4,4,4,4",
-                        "startOffsets": "6458,6815,6920,7035",
-                        "endColumns": "112,104,114,100",
-                        "endOffsets": "6566,6915,7030,7131"
                     }
                 }
             ]

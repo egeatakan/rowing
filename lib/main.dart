@@ -3,15 +3,22 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+// Google ve Apple ile giriş için paketler
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:sign_in_with_apple/sign_in_with_apple.dart';
+
+// Platforma özgü kontroller için kIsWeb ve dart:io Platform
+import 'package:flutter/foundation.dart' show kIsWeb;
+// Mobil platformlar için dart:io Platform importu (web'de hata vermemesi için koşullu import gerekebilir)
+// Ancak Flutter 3.7 ve sonrası için doğrudan import genellikle sorun çıkarmaz,
+// kIsWeb ile doğru kullanıldığı sürece.
+import 'dart:io' show Platform;
+
+
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import 'firebase_options.dart';
-// main_menu_screen.dart dosyanızın doğru yolda olduğundan emin olun
-// Örneğin, lib/screens/main_menu_screen.dart ise:
 import 'screens/main_menu_screen.dart';
-// SignInScreen dosyanızın doğru yolda olduğundan emin olun
-// Örneğin, lib/screens/sign_in_screen.dart ise:
-// import 'screens/sign_in_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -35,8 +42,6 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   Locale? _locale;
-  // SharedPreferences anahtarını değiştirmek, eski kaydedilmiş değeri geçersiz kılar.
-  // Testler için V2, V3 gibi artırabilirsiniz.
   static const String _selectedLanguageCodeKey = 'selectedLanguageCodeV2';
 
   @override
@@ -49,15 +54,11 @@ class _MyAppState extends State<MyApp> {
     final prefs = await SharedPreferences.getInstance();
     String? languageCode = prefs.getString(_selectedLanguageCodeKey);
     Locale initialLocale;
-
     if (languageCode != null && languageCode.isNotEmpty) {
       initialLocale = Locale(languageCode);
     } else {
-      initialLocale = const Locale('en'); // Varsayılan dil İngilizce
-      // Eğer ilk defa varsayılan dil atanıyorsa ve bunu kaydetmek isterseniz:
-      // await _saveLocale(initialLocale);
+      initialLocale = const Locale('en');
     }
-
     if (mounted) {
       setState(() {
         _locale = initialLocale;
@@ -82,19 +83,15 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     if (_locale == null) {
-      // _loadLocale tamamlanana kadar kısa bir yükleme ekranı
       return const MaterialApp(
         home: Scaffold(body: Center(child: CircularProgressIndicator())),
         debugShowCheckedModeBanner: false,
       );
     }
-
     return MaterialApp(
-      // key: ValueKey(_locale), // <-- BU SATIR KALDIRILDI veya YORUM SATIRI YAPILDI
-                               // Navigasyon yığınının sıfırlanmasını önlemek için.
       title: 'Rowing Pro',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
+      theme: ThemeData( /* ... Tema ayarlarınız ... */
         primarySwatch: Colors.blue,
         visualDensity: VisualDensity.adaptivePlatformDensity,
         colorScheme: ColorScheme.fromSeed(
@@ -128,7 +125,7 @@ class _MyAppState extends State<MyApp> {
         appBarTheme: AppBarTheme(
           backgroundColor: Colors.lightBlueAccent.shade100,
           elevation: 2,
-          titleTextStyle: const TextStyle(
+          titleTextStyle: TextStyle(
             color: Colors.black87,
             fontSize: 20,
             fontWeight: FontWeight.w500,
@@ -138,8 +135,7 @@ class _MyAppState extends State<MyApp> {
       ),
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
-      locale: _locale, // Bu satır, MaterialApp'e hangi dilin kullanılacağını söyler.
-
+      locale: _locale,
       home: StreamBuilder<User?>(
         stream: FirebaseAuth.instance.authStateChanges(),
         builder: (context, snapshot) {
@@ -149,7 +145,6 @@ class _MyAppState extends State<MyApp> {
           if (snapshot.hasData && snapshot.data != null) {
             return const MainMenuScreen();
           }
-          // SignInScreen'in doğru import edildiğinden/tanımlandığından emin olun
           return const SignInScreen();
         },
       ),
@@ -157,12 +152,8 @@ class _MyAppState extends State<MyApp> {
   }
 }
 
-//===================================================================
-// GİRİŞ / KAYIT EKRANI (SignInScreen)
-//===================================================================
-// Bu widget'ı lib/screens/sign_in_screen.dart gibi ayrı bir dosyaya taşımanız önerilir.
 class SignInScreen extends StatefulWidget {
-  const SignInScreen({super.key});
+  const SignInScreen({Key? key}) : super(key: key);
 
   @override
   State<SignInScreen> createState() => _SignInScreenState();
@@ -171,7 +162,7 @@ class SignInScreen extends StatefulWidget {
 class _SignInScreenState extends State<SignInScreen> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  bool _loading = false;
+  bool _isLoading = false;
   final _formKey = GlobalKey<FormState>();
 
   @override
@@ -181,58 +172,109 @@ class _SignInScreenState extends State<SignInScreen> {
     super.dispose();
   }
 
-  Future<void> _handleAuthOperation(Future<UserCredential> Function() authOperation, String errorMessagePrefix) async {
-    if (!_formKey.currentState!.validate()) return;
+  Future<void> _showErrorDialog(String message) async {
     if (!mounted) return;
-    setState(() { _loading = true; });
+    final l10n = AppLocalizations.of(context);
+    String title = l10n?.settingsTitle ?? 'Login Error'; 
+    String okButton = l10n?.save ?? 'OK'; 
+
+    await showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(title),
+        content: Text(message),
+        actions: <Widget>[
+          TextButton(
+            child: Text(okButton),
+            onPressed: () {
+              Navigator.of(ctx).pop();
+            },
+          )
+        ],
+      ),
+    );
+  }
+
+  Future<void> _firebaseSignIn(Future<UserCredential?> Function() signInMethod) async {
+    if (!mounted) return;
+    setState(() { _isLoading = true; });
     try {
-      await authOperation();
+      final UserCredential? userCredential = await signInMethod();
+      if (userCredential?.user != null) {
+        print("Firebase girişi başarılı: ${userCredential!.user!.uid}");
+      }
     } on FirebaseAuthException catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            backgroundColor: Theme.of(context).colorScheme.error,
-            content: Text('$errorMessagePrefix: ${e.message ?? "Bilinmeyen bir Firebase hatası."}')
-          ),
-        );
-      }
+      _showErrorDialog(e.message ?? "Bilinmeyen bir Firebase kimlik doğrulama hatası.");
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            backgroundColor: Theme.of(context).colorScheme.error,
-            content: Text('Beklenmedik bir hata oluştu: ${e.toString()}')
-          ),
-        );
-      }
+      _showErrorDialog("Beklenmedik bir hata oluştu: ${e.toString()}");
     }
-    if (!mounted) return;
-    setState(() { _loading = false; });
+    if (mounted) {
+      setState(() { _isLoading = false; });
+    }
   }
 
-  Future<void> _signInWithEmailAndPassword() async {
-    await _handleAuthOperation(
-      () => FirebaseAuth.instance.signInWithEmailAndPassword(
-        email: _emailController.text.trim(),
-        password: _passwordController.text.trim(),
-      ),
-      'Giriş hatası'
+  Future<UserCredential?> _signInWithEmailAndPassword() async {
+    if (!_formKey.currentState!.validate()) return null;
+    return await FirebaseAuth.instance.signInWithEmailAndPassword(
+      email: _emailController.text.trim(),
+      password: _passwordController.text.trim(),
     );
   }
 
-  Future<void> _createUserWithEmailAndPassword() async {
-    await _handleAuthOperation(
-      () => FirebaseAuth.instance.createUserWithEmailAndPassword(
-        email: _emailController.text.trim(),
-        password: _passwordController.text.trim(),
-      ),
-      'Kayıt hatası'
+  Future<UserCredential?> _createUserWithEmailAndPassword() async {
+    if (!_formKey.currentState!.validate()) return null;
+    return await FirebaseAuth.instance.createUserWithEmailAndPassword(
+      email: _emailController.text.trim(),
+      password: _passwordController.text.trim(),
     );
+  }
+
+  Future<UserCredential?> _signInWithGoogle() async {
+    try {
+      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+      if (googleUser == null) return null;
+      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+      final AuthCredential credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+      return await FirebaseAuth.instance.signInWithCredential(credential);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<UserCredential?> _signInWithApple() async {
+    try {
+      final appleCredential = await SignInWithApple.getAppleIDCredential(
+        scopes: [
+          AppleIDAuthorizationScopes.email,
+          AppleIDAuthorizationScopes.fullName,
+        ],
+      );
+      final OAuthProvider oAuthProvider = OAuthProvider('apple.com');
+      final AuthCredential credential = oAuthProvider.credential(
+        idToken: appleCredential.identityToken,
+        rawNonce: null, 
+      );
+      return await FirebaseAuth.instance.signInWithCredential(credential);
+    } catch (e) {
+      rethrow;
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
+
+    bool showAppleSignInButton = false;
+    if (!kIsWeb) { // Eğer web platformu değilse
+      if (Platform.isIOS) { // Sadece iOS ise Apple ile Giriş butonunu göster
+        showAppleSignInButton = true;
+      }
+    }
+
     return Scaffold(
       body: SafeArea(
         child: Center(
@@ -247,7 +289,7 @@ class _SignInScreenState extends State<SignInScreen> {
                   Icon(Icons.rowing, size: 80, color: theme.colorScheme.primary),
                   const SizedBox(height: 20),
                   Text(
-                    "Rowing Pro",
+                    l10n.appTitle, 
                     textAlign: TextAlign.center,
                     style: theme.textTheme.displaySmall?.copyWith(
                           fontWeight: FontWeight.bold,
@@ -256,17 +298,17 @@ class _SignInScreenState extends State<SignInScreen> {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    "Hesabınıza giriş yapın veya yeni hesap oluşturun",
+                    "Hesabınıza giriş yapın veya yeni hesap oluşturun", 
                     textAlign: TextAlign.center,
                     style: theme.textTheme.titleMedium?.copyWith(color: Colors.grey[700]),
                   ),
-                  const SizedBox(height: 40),
+                  const SizedBox(height: 30),
                   TextFormField(
                     controller: _emailController,
-                    decoration: const InputDecoration(labelText: 'Email', prefixIcon: Icon(Icons.email_outlined)),
+                    decoration: InputDecoration(labelText: 'Email', prefixIcon: Icon(Icons.email_outlined)), 
                     keyboardType: TextInputType.emailAddress,
                     textInputAction: TextInputAction.next,
-                    validator: (value) {
+                    validator: (value) { 
                       if (value == null || value.trim().isEmpty) return 'Lütfen email adresinizi girin.';
                       if (!RegExp(r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9]+\.[a-zA-Z]+").hasMatch(value)) {
                         return 'Lütfen geçerli bir email adresi girin.';
@@ -277,28 +319,63 @@ class _SignInScreenState extends State<SignInScreen> {
                   const SizedBox(height: 16),
                   TextFormField(
                     controller: _passwordController,
-                    decoration: const InputDecoration(labelText: 'Şifre', prefixIcon: Icon(Icons.lock_outline)),
+                    decoration: InputDecoration(labelText: 'Şifre', prefixIcon: Icon(Icons.lock_outline)), 
                     obscureText: true,
                     textInputAction: TextInputAction.done,
-                    validator: (value) {
+                    validator: (value) { 
                       if (value == null || value.isEmpty) return 'Lütfen şifrenizi girin.';
                       if (value.length < 6) return 'Şifre en az 6 karakter olmalıdır.';
                       return null;
                     },
                   ),
-                  const SizedBox(height: 30),
-                  if (_loading)
+                  const SizedBox(height: 24),
+                  if (_isLoading)
                     const Center(child: CircularProgressIndicator())
                   else ...[
                     ElevatedButton(
-                      onPressed: _signInWithEmailAndPassword,
-                      child: const Text('GİRİŞ YAP'),
+                      onPressed: () => _firebaseSignIn(_signInWithEmailAndPassword),
+                      child: Text('GİRİŞ YAP'), 
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 10),
                     TextButton(
-                      onPressed: _createUserWithEmailAndPassword,
-                      child: const Text('Yeni Hesap Oluştur'),
+                      onPressed: () => _firebaseSignIn(_createUserWithEmailAndPassword),
+                      child: Text('Yeni Hesap Oluştur'), 
                     ),
+                    const SizedBox(height: 20),
+                    Row(
+                      children: <Widget>[
+                        const Expanded(child: Divider()),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                          child: Text("VEYA", style: TextStyle(color: Colors.grey.shade600)), 
+                        ),
+                        const Expanded(child: Divider()),
+                      ],
+                    ),
+                    const SizedBox(height: 20),
+                    ElevatedButton.icon(
+                      icon: Image.asset('assets/google_logo.png', height: 24.0, width: 24.0, errorBuilder: (context, error, stackTrace) => const Icon(Icons.login, size: 24)),
+                      label: Text('Google ile Giriş Yap'), 
+                      onPressed: () => _firebaseSignIn(_signInWithGoogle),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.white,
+                        foregroundColor: Colors.black87,
+                        elevation: 2,
+                        side: BorderSide(color: Colors.grey.shade300)
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    // Apple ile Giriş Butonu (Sadece iOS'ta ve web değilse gösterilir)
+                    if (showAppleSignInButton) 
+                      SignInWithAppleButton(
+                        text: "Apple ile Giriş Yap", 
+                        height: 48,
+                        borderRadius: const BorderRadius.all(Radius.circular(10.0)),
+                        onPressed: () => _firebaseSignIn(_signInWithApple),
+                        style: SignInWithAppleButtonStyle.black,
+                      )
+                    // Web'de Apple butonu için alternatif bir mesaj göstermiyoruz,
+                    // çünkü showAppleSignInButton false olacak ve buton hiç render edilmeyecek.
                   ]
                 ],
               ),
